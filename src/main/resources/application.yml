@@ -1,0 +1,24 @@
+server:
+  port: 8079
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/toy_db
+    username: root
+    password: password
+#    mapper-location: classpath:/mapper/**/*.xml
+
+mybatis:
+#  configuration:
+#    multiple-result-sets-enabled: false
+#    map-underscore-to-camel-case: true
+#    call-setters-on-nulls: true
+#    jdbc-type-for-null: varchar
+#    default-fetch-size: 500
+  mapper-locations: classpath:mybatis/mapper/*.xml
+  type-aliases-package: com.toy.toy_petsitter_back
