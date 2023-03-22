@@ -8,17 +8,14 @@ server:
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/toy_db
+    jdbc-url: jdbc:mysql://localhost:3306/toy_db
     username: root
     password: password
-#    mapper-location: classpath:/mapper/**/*.xml
+    mapper-locations: classpath:mybatis/mapper/*.xml
 
 mybatis:
-#  configuration:
-#    multiple-result-sets-enabled: false
-#    map-underscore-to-camel-case: true
-#    call-setters-on-nulls: true
-#    jdbc-type-for-null: varchar
-#    default-fetch-size: 500
+  configuration:
+    map-underscore-to-camel-case: true
+#  type-aliases-package: com.toy.toy_petsitter_back
   mapper-locations: classpath:mybatis/mapper/*.xml
-  type-aliases-package: com.toy.toy_petsitter_back
+  config-location: classpath:mybatis/mybatis-config.xml
