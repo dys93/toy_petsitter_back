@@ -1,6 +1,8 @@
 package com.toy.toy_petsitter_back.controller;
 
+import com.toy.toy_petsitter_back.exception.ErrorMessage;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.SneakyThrows;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -9,10 +11,12 @@ import java.util.Objects;
 public class BaseController {
 
     //파라미터 값 가져올 때 사용(null일 경우 에러발생)
+    @SneakyThrows
     public String getParameter(String id) {
         String value = getRequest().getParameter(id);
         if(value == null) {
-            //파라미터 오류 추가 필요
+            //오류 테스트
+            throw ErrorMessage.UNMATCHED_AUTHORITY.getException();
         }
         return value;
     }

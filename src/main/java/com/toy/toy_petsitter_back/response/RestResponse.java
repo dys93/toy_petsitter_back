@@ -3,6 +3,8 @@ package com.toy.toy_petsitter_back.response;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
+import com.toy.toy_petsitter_back.exception.CustomException;
+import lombok.val;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -60,4 +62,13 @@ public class RestResponse {
     public String toJasonString() {
         return new GsonBuilder().excludeFieldsWithoutExposeAnnotation().serializeNulls().create().toJson(this);
     }
+
+    public RestResponse customError(CustomException e) {
+        val instance = this;
+        instance.code = e.getCode();
+        instance.subCode = e.getSubCode();
+        instance.error = e.getMsg();
+        return instance;
+    }
+
 }
