@@ -20,17 +20,28 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+	implementation 'com.google.code.gson:gson'
+
+	implementation 'org.bgee.log4jdbc-log4j2:log4jdbc-log4j2-jdbc4.1:1.16'
 
 	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.0'
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.projectlombok:lombok:1.18.22'
+	testImplementation 'org.projectlombok:lombok:1.18.22'
+	testImplementation 'org.projectlombok:lombok:1.18.22'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 
 	runtimeOnly 'com.mysql:mysql-connector-j'
 
-	implementation 'com.google.code.gson:gson'
+//	implementation 'org.apache.logging.log4j:log4j-core'
+//	implementation 'org.apache.logging.log4j:log4j-api'
+
+//	implementation 'ch.qos.logback:logback-classic:1.2.8'
 }
 
 tasks.named('test') {
