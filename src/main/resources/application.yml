@@ -4,6 +4,11 @@ server:
     encoding:
       charset: UTF-8
       force: true
+  error:
+    include-exception: false
+    include-stacktrace: never
+    whitelabel:
+      enabled: false
 
 spring:
   datasource:
@@ -19,3 +24,8 @@ mybatis:
 #  type-aliases-package: com.toy.toy_petsitter_back
   mapper-locations: classpath:mybatis/mapper/*.xml
   config-location: classpath:mybatis/mybatis-config.xml
+
+
+secret:
+  aeskey256: S&*@F2pd<#/dsSEc_t1!s&dcP^d@fL1@ #32자리
+  ivspec: Gk_sfj#5%FspM0#+ #16자리

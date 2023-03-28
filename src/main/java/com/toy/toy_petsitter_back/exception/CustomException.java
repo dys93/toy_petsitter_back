@@ -3,6 +3,8 @@ package com.toy.toy_petsitter_back.exception;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Arrays;
+
 @Getter
 @Setter
 public class CustomException extends Exception{
@@ -16,6 +18,12 @@ public class CustomException extends Exception{
         this.subCode = subCode;
         this.msg = msg;
     }
+
+    public CustomException setMsgValue(String[] str) {
+        Arrays.asList(str).forEach(s -> msg = msg.replaceFirst("\\{\\{}}", s));
+        return this;
+    }
+
 
 
 }

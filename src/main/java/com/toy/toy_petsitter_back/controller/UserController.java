@@ -2,10 +2,9 @@ package com.toy.toy_petsitter_back.controller;
 
 import com.toy.toy_petsitter_back.response.RestResponse;
 import com.toy.toy_petsitter_back.service.UserService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 
@@ -19,7 +18,8 @@ public class UserController extends BaseController {
         this.userService = userService;
     }
 
-    @RequestMapping(value = "/userInfo")
+//    @RequestMapping(value = "/userInfo")
+    @RequestMapping(value = "/userInfo", method = RequestMethod.GET)
     public ResponseEntity<?> userInfo() {
         return new RestResponse().ok().setBody(userService.getUserInfo()).responseEntity();
     }
@@ -27,6 +27,22 @@ public class UserController extends BaseController {
     @RequestMapping(value = "/userList")
     public ResponseEntity<?> userList() {
         return new RestResponse().ok().setBody(userService.getUserList()).responseEntity();
+    }
+
+    //회원가입
+    @RequestMapping(value = "/signUp", method = RequestMethod.POST)
+    public ResponseEntity<?> signUp() {
+        return new RestResponse().ok().setBody(userService.signUp(
+                getParameter("authority"), getParameter("email"), getParameter("password"), getParameter("name"),
+                getParameter("phone"), getParameterOrNull("zipCode"), getParameter("address"), getParameterOrNull("addressDetail"),
+                getParameterOrNull("petYn"), getParameterOrNull("experience"), getParameterOrNull("exDetail"))
+        ).responseEntity();
+    }
+
+    @RequestMapping(value = "/login", method = RequestMethod.GET)
+    public ResponseEntity<?> login() {
+        System.out.println(">>>>>>>>>>로그인"+getParameter("id")+getParameter("pwd"));
+        return new RestResponse().ok().setBody(userService.login(getParameter("id"), getParameter("pwd"))).responseEntity();
     }
 
 }

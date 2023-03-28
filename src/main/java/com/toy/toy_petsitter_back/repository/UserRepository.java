@@ -13,4 +13,12 @@ public interface UserRepository {
     HashMap<String, Object> getUserInfo();
 
     List<HashMap<String, Object>> getUserList();
+
+    String checkId(String id);
+
+    //로그인 할 때 ID랑 PWD (나중에 로그인 시 내려줄 데이터 추가) 정보 져오기
+    HashMap<String, Object> getLoginInfoHash(String email);
+
+    //회원가입
+    void insertUser(HashMap<String, Object> data);
 }

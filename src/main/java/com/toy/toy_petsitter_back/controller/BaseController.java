@@ -1,6 +1,7 @@
 package com.toy.toy_petsitter_back.controller;
 
 import com.toy.toy_petsitter_back.exception.ErrorMessage;
+import com.toy.toy_petsitter_back.service.LogService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.SneakyThrows;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -8,7 +9,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.Objects;
 
-public class BaseController {
+public class BaseController extends LogService {
 
     //파라미터 값 가져올 때 사용(null일 경우 에러발생)
     @SneakyThrows
