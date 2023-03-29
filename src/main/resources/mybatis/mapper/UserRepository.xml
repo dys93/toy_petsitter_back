@@ -12,11 +12,11 @@
     </select>
 
     <select id="getLoginInfo" resultType="HashMap" parameterType="String">
-        SELECT email, password FROM user WHERE email = #{id, jdbcType=VARCHAR}
+        SELECT * FROM user WHERE email = #{id, jdbcType=VARCHAR}
     </select>
 
     <select id="getLoginInfoHash" resultType="HashMap" parameterType="String">
-        SELECT user_seq, email, password FROM user WHERE email = #{id, jdbcType=VARCHAR}
+        SELECT * FROM user WHERE email = #{id, jdbcType=VARCHAR}
     </select>
 
     <!-- 아이디 존재 여부 확인 -->
@@ -33,5 +33,15 @@
                 now(), #{sitterAccount, jdbcType=VARCHAR}, #{sitterExperience, jdbcType=VARCHAR}, #{experienceDetail, jdbcType=VARCHAR}
                 ,#{petExperience, jdbcType=VARCHAR})
     </insert>
+
+    <!-- 비밀번호 오류 횟수 추가 -->
+    <update id="addFailCount" >
+        UPDATE USER SET fail_count = #{failCount} WHERE email = #{email}
+    </update>
+
+    <!-- 계정 잠금 -->
+    <update id="lockUser" >
+        UPDATE USER SET user_status = 'R', fail_count = #{failCount} WHERE email = #{email}
+    </update>
 
 </mapper>

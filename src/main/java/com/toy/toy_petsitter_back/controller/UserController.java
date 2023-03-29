@@ -39,9 +39,10 @@ public class UserController extends BaseController {
         ).responseEntity();
     }
 
-    @RequestMapping(value = "/login", method = RequestMethod.GET)
+    @RequestMapping(value = "/login", method = RequestMethod.POST)
     public ResponseEntity<?> login() {
-        System.out.println(">>>>>>>>>>로그인"+getParameter("id")+getParameter("pwd"));
+        System.out.println(">>>>>>>>>>로그인ID"+getParameter("id"));
+        System.out.println(">>>>>>>>>>로그인PWD"+getParameter("pwd"));
         return new RestResponse().ok().setBody(userService.login(getParameter("id"), getParameter("pwd"))).responseEntity();
     }
 

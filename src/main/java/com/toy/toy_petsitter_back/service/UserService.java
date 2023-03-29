@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 @Primary
 @Service
@@ -68,40 +69,48 @@ public class UserService {
         return new HashMap<>();
     }
 
-    //로그인 테스트
-    @Transactional
+    //로그인
+
     @SneakyThrows
     public HashMap<String, Object> login(String id, String pwd) {
-        System.out.println(">>>>>>>>service login()");
 
-        //DB에서 회원 데이터 꺼내오는 부분 필요.
-        //이 부분에서 유저 정보를 가져오고 해당 정보로 로그인 실패/성공 여부 가림
-        //꺼내올 정보 = 아이디, 비밀번호,
-
+        //회원 데이터 조회
         HashMap<String, Object> resultUser = userRepository.getLoginInfoHash(id);
 
         //존재하지 않는 아이디면 로그인 실패
-        //if(userRepository.checkId(id) == null) throw ErrorMessage.ALREADY_ID.getException();
-        if(resultUser == null) throw ErrorMessage.ALREADY_ID.getException();
+        if(resultUser == null) throw ErrorMessage.UNMATCHED_ID_PWD.getException();
+
+        //잠긴 계정 여부 확인
+        if(Objects.equals(resultUser.get("user_status").toString(), "R")) throw ErrorMessage.LOCK_USER.getException();
+
+
+        //비밀번호 오류 횟수
+        int count = (int)resultUser.get("fail_count");
 
         //비밀번호가 틀렸으면 로그인 실패
-        //if(pwd.equals(Crypto.encodeSHA256(pwd +id.substring(0,4)))) throw ErrorMessage.ALREADY_ID.getException();
-        System.out.println(">>>>>>>>>>>>resultUser.pwd:"+resultUser.get("password"));
-        System.out.println(">>>>>>>>>>>>Crypto.encodeSHA256(pwd +id.substring(0,4))):"+Crypto.encodeSHA256(pwd +id.substring(0,4)));
-        if(resultUser.get("password").equals(Crypto.encodeSHA256(pwd +id.substring(0,4)))) throw ErrorMessage.ALREADY_ID.getException();
+        if(!resultUser.get("password").equals(Crypto.encodeSHA256(pwd +id.substring(0,4)))) {
+            //오류 2회 이상
+            if(count >= 2) {
+                //계정 잠금 및 오류 횟수 추가, 오류 내보내기
+                count++;
+                userRepository.lockUser(count, id);
+                throw ErrorMessage.LOCK_USER.getException();
+            }
 
+            //오류 횟수 카운트 + 1, 오류 내보내기
+            count++;
+            userRepository.addFailCount(count, id);
+            throw ErrorMessage.UNMATCHED_ID_PWD.getException();
+        }
 
         //아이디 존재 + 비밀번호 일치 => 로그인 : accessToken 생성해서 같이 내려줌
         Member member = new Member();
-        System.out.println(">>>>>>>>>>>>>>>>>>>>resultUser.user_seq: "+resultUser.get("user_seq"));
         member.setUserKey(resultUser.get("user_seq").toString());
+
         HashMap<String, Object> result = new HashMap<>();
         result.put("accessToken", new JwtService().createJwt(member));
+
         return result;
-
-
-
-        //return new HashMap<>();
     }
 
 }

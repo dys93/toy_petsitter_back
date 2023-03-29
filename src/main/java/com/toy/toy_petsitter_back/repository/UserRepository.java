@@ -21,4 +21,10 @@ public interface UserRepository {
 
     //회원가입
     void insertUser(HashMap<String, Object> data);
+
+    //비밀번호 오류 횟수 추가
+    void addFailCount(Integer failCount, String email);
+
+    //계정 잠금
+    void lockUser(Integer failCount, String email);
 }
