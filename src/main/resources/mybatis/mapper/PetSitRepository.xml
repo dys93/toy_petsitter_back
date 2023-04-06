@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.toy.toy_petsitter_back.repository.PetSitRepository">
+    <!-- 내 작성글 저장 -->
+    <insert id="insertMyPost" parameterType="HashMap">
+        INSERT INTO SITTER_POST (TITLE, CONTENT, PET_YN, PICKUP_YN, LARGE_DOG_YN, YARD_YN, OLD_DOG_YN, PRICE_LARGE, PRICE_MEDIUM,
+                          PRICE_SMALL, USER_SEQ, REG_DATE, DELETE_YN)
+        VALUES (#{title, jdbcType=VARCHAR}, #{content, jdbcType=VARCHAR}, #{petYn, jdbcType=VARCHAR}, #{pickupYn, jdbcType=VARCHAR},
+                #{largeDogYn, jdbcType=VARCHAR}, #{yardYn, jdbcType=VARCHAR}, #{oldDogYn, jdbcType=VARCHAR}, #{priceLarge, jdbcType=INTEGER},
+                #{priceMedium, jdbcType=INTEGER}, #{priceSmall, jdbcType=INTEGER}, #{userKey, jdbcType=INTEGER}, now(), 'N')
+    </insert>
+
+    <!-- 내 작성글 불러오기 -->
+    <select id="getMyPost" resultType="HashMap" parameterType="Integer">
+        SELECT * FROM SITTER_POST WHERE USER_SEQ = #{userKey, jdbcType=INTEGER} AND DELETE_YN='N'
+    </select>
+
+    <!-- 내 작성글 수정하기 -->
+    <update id="updateMyPost">
+        UPDATE SITTER_POST SET TITLE=#{title, jdbcType=VARCHAR}, CONTENT=#{content, jdbcType=VARCHAR}, PET_YN=#{petYn, jdbcType=VARCHAR}, PICKUP_YN=#{pickupYn, jdbcType=VARCHAR},
+                               LARGE_DOG_YN=#{largeDogYn, jdbcType=VARCHAR}, YARD_YN=#{yardYn, jdbcType=VARCHAR}, OLD_DOG_YN=#{oldDogYn, jdbcType=VARCHAR},
+                               PRICE_LARGE=#{priceLarge, jdbcType=INTEGER}, PRICE_MEDIUM=#{priceMedium, jdbcType=INTEGER}, PRICE_SMALL=#{priceSmall, jdbcType=INTEGER}, MODI_DATE= now() WHERE USER_SEQ =#{userKey}
+    </update>
+
+    <!-- 내 작성글 삭제-->
+    <update id="deleteMyPost">
+        UPDATE SITTER_POST SET DELETE_YN = 'Y' WHERE USER_SEQ = #{userSeq} AND DELETE_YN='N';
+    </update>
+
+    <!-- 게시글 리스트 가져오기 -->
+    <select id="getPostList" resultType="HashMap">
+        SELECT sp.PETSIT_SEQ, sp.TITLE, sp.PET_YN, sp.PICKUP_YN, sp.LARGE_DOG_YN, sp.YARD_YN, sp.OLD_DOG_YN,
+               sp.PRICE_LARGE, sp.PRICE_MEDIUM, sp.PRICE_SMALL, sp.REG_DATE, u.ADDRESS, u.ADDRESS_DETAIL FROM SITTER_POST sp
+                 INNER JOIN USER u
+                 ON sp.USER_SEQ = u.USER_SEQ
+                 WHERE u.USER_STATUS = 'U' AND u.POST_YN = 'Y' AND sp.DELETE_YN='N'
+                 ORDER BY PETSIT_SEQ LIMIT #{pageStart}, #{perPageNum}
+    </select>
+
+    <!-- 게시글 총 갯수 가져오기 -->
+    <select id="totalCount" resultType="Integer">
+        SELECT count(*) FROM SITTER_POST WHERE DELETE_YN='N';
+    </select>
+
+    <!-- 게시글 작성 상태 변경 -->
+    <update id="updatePostStatus" >
+        UPDATE USER SET POST_YN =#{postYn} WHERE USER_SEQ = #{userSeq}
+    </update>
+
+    <!-- 게시글 상세 페이지(예약 페이지) 불러오기-->
+    <select id="getPostDetail" resultType="HashMap">
+        SELECT * FROM SITTER_POST WHERE PETSIT_SEQ = #{petsitSeq}
+    </select>
+
+</mapper>
