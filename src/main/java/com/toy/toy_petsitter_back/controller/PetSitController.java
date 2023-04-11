@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
+
 
 @RequestMapping("/api/v1/petSit")
 @RestController
@@ -68,8 +70,7 @@ public class PetSitController extends BaseController {
     public ResponseEntity<?> getPostList() {
 
         Criteria criteria = new Criteria();
-        //criteria.setPage(2); //현재 페이지
-        //criteria.setPerPageNum(10);
+        criteria.setPerPageNum(10);
         criteria.setPage(Integer.parseInt(getParameter("pageNum"))); //현재 페이지
 
         System.out.println(">>>>>>>>>>>>>>>petSitService.getPostList(criteria)"+petSitService.getPostList(criteria));
@@ -85,7 +86,35 @@ public class PetSitController extends BaseController {
     @RequestMapping(value = "/getPostDetail", method = RequestMethod.GET)
     public ResponseEntity<?> getPostDetail() {
         System.out.println(">>>>>>>>>>>>>>>>>>>>>게시글 상세 Controller");
-        System.out.println(">>>>>>>>>>>>>>>>>>>>>petsitSeq: "+getParameter("petsitSeq"));
-        return new RestResponse().ok().setBody(petSitService.getPostDetail(Integer.parseInt(getParameter("petsitSeq")))).responseEntity();
+        System.out.println(">>>>>>>>>>>>>>>>>>>>>petsitSeq: "+getParameter("petSitSeq"));
+        return new RestResponse().ok().setBody(petSitService.getPostDetail(Integer.parseInt(getParameter("petSitSeq")))).responseEntity();
     }
+
+    /**
+     * 리뷰 불러오기
+     */
+    @AuthCheck(role = AuthCheck.Role.NONE)
+    @RequestMapping(value = "/getReview", method = RequestMethod.GET)
+    public ResponseEntity<?> getReview() {
+        System.out.println(">>>>>>>>>>>>>>>>>>>>>리뷰 불러오기 Controller");
+        System.out.println(">>>>>>>>>>>>>>>>>>>>>petsitSeq: "+getParameter("petSitSeq"));
+
+        Criteria criteria = new Criteria();
+        criteria.setPerPageNum(5);
+        criteria.setPage(Integer.parseInt(getParameter("pageNum"))); //현재 페이지
+
+        return new RestResponse().ok().setBody(petSitService.getReview(criteria,Integer.parseInt(getParameter("petSitSeq")))).responseEntity();
+    }
+
+    /**
+     *  예약 요청
+     */
+    @AuthCheck(role = AuthCheck.Role.USER)
+    @RequestMapping(value = "/requestReservation", method = RequestMethod.POST)
+    public ResponseEntity<?> requestReservation() {
+        return new RestResponse().ok().setBody(petSitService.requestReservation(getParameter("checkIn"), getParameter("checkOut"),
+                Integer.parseInt(getParameter("price")), Integer.parseInt(getParameter("smallCnt")), Integer.parseInt(getParameter("mediumCnt")),
+                Integer.parseInt(getParameter("largeCnt")), Integer.parseInt(getParameter("petSitSeq")))).responseEntity();
+    }
+
 }

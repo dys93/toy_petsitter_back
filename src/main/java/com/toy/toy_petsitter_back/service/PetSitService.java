@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
+import java.util.List;
 
 @Primary
 @Service
@@ -109,13 +110,14 @@ public class PetSitService extends BaseService {
 
         return new HashMap<>() {{
             put("list", petSitRepository.getPostList(criteria));
+            put("page", criteria.getPage());
             put("totalCount", pagination.getTotalCount());
             put("startPage", pagination.getStartPage());
             put("endPage", pagination.getEndPage());
         }};
     }
 
-    //전체 데이터 갯수 가져오기
+    //게시글 전체 데이터 갯수 가져오기
     public Integer totalCount() {
         return petSitRepository.totalCount();
     }
@@ -129,5 +131,59 @@ public class PetSitService extends BaseService {
 
     }
 
+    //리뷰 리스트 가져오기
+    public HashMap<String, Object> getReview(Criteria criteria, Integer petsitSeq) {
+
+        System.out.println(">>>>>>>>>>getReview() Service"+criteria);
+
+        System.out.println(">>>>>>>>>>리뷰 리스트 가져오기criteria.getPerPageNum()"+criteria.getPerPageNum());
+
+        Pagination pagination = new Pagination();
+        pagination.setCriteria(criteria); //현재 페이지 //한 페이지당 보여 줄 게시글의 갯수
+        pagination.setTotalCount(reviewTotalCount(petsitSeq)); //총 게시글 수
+
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("pageStart", criteria.getPageStart());
+        data.put("perPageNum", criteria.getPerPageNum());
+        data.put("petsitSeq", petsitSeq);
+
+        return new HashMap<>() {{
+            put("reviewList", petSitRepository.getReview(data));
+            put("page", criteria.getPage());
+            put("totalCount", pagination.getTotalCount());
+            put("startPage", pagination.getStartPage());
+            put("endPage", pagination.getEndPage());
+        }};
+    }
+
+    //리뷰 전체 데이터 갯수 가져오기
+    public Integer reviewTotalCount(Integer petsitSeq) {
+        return petSitRepository.reviewTotalCount(petsitSeq);
+    }
+
+    //예약 요청 저장하기
+    public HashMap<String, Object> requestReservation(String checkIn, String checkOut, Integer price, Integer smallCnt,
+                                                      Integer mediumCnt, Integer largeCnt, Integer petSitSeq) {
+
+        //글작성한 sitter_seq 가져오기
+        Integer sitterSeq = petSitRepository.selectSitterSeq(petSitSeq);
+
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("checkIn",checkIn);
+        data.put("checkOut",checkOut);
+        data.put("price",price);
+        data.put("smallCnt",smallCnt);
+        data.put("mediumCnt",mediumCnt);
+        data.put("largeCnt",largeCnt);
+        data.put("petSitSeq",petSitSeq);
+        data.put("userSeq", getUserKey());
+        data.put("sitterSeq", sitterSeq);
+
+        //예약 요청 저장
+        petSitRepository.insertReservation(data);
+
+        return new HashMap<>();
+
+    }
 
 }

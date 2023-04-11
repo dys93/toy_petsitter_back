@@ -31,12 +31,16 @@
 
     <!-- 게시글 리스트 가져오기 -->
     <select id="getPostList" resultType="HashMap">
-        SELECT sp.PETSIT_SEQ, sp.TITLE, sp.PET_YN, sp.PICKUP_YN, sp.LARGE_DOG_YN, sp.YARD_YN, sp.OLD_DOG_YN,
-               sp.PRICE_LARGE, sp.PRICE_MEDIUM, sp.PRICE_SMALL, sp.REG_DATE, u.ADDRESS, u.ADDRESS_DETAIL FROM SITTER_POST sp
-                 INNER JOIN USER u
-                 ON sp.USER_SEQ = u.USER_SEQ
-                 WHERE u.USER_STATUS = 'U' AND u.POST_YN = 'Y' AND sp.DELETE_YN='N'
-                 ORDER BY PETSIT_SEQ LIMIT #{pageStart}, #{perPageNum}
+        SELECT sp.petsit_seq, sp.title, sp.pet_yn, sp.pickup_yn, sp.large_dog_yn, sp.yard_yn, sp.old_dog_yn,
+               sp.price_large, sp.price_medium, sp.price_small, sp.reg_date, u.address, u.address_detail,
+               (SELECT count(*) from REVIEW rv WHERE rv.petsit_seq = sp.petsit_seq) review_count
+        FROM SITTER_POST sp
+                 LEFT JOIN USER u
+                 ON sp.user_seq = u.user_seq
+                 LEFT JOIN REVIEW r
+                 ON sp.petsit_seq = r.petsit_seq
+                 WHERE u.user_status = 'U' AND u.post_yn = 'Y' AND sp.delete_yn='N'
+                 ORDER BY petsit_seq LIMIT #{pageStart}, #{perPageNum}
     </select>
 
     <!-- 게시글 총 갯수 가져오기 -->
@@ -50,8 +54,40 @@
     </update>
 
     <!-- 게시글 상세 페이지(예약 페이지) 불러오기-->
-    <select id="getPostDetail" resultType="HashMap">
-        SELECT * FROM SITTER_POST WHERE PETSIT_SEQ = #{petsitSeq}
+    <select id="getPostDetail" resultType="HashMap" parameterType="Integer">
+        SELECT sp.petsit_seq, sp.title, sp.content, sp.pet_yn, sp.pickup_yn, sp.large_dog_yn, sp.yard_yn, sp.old_dog_yn,
+               sp.price_large, sp.price_medium, sp.price_small, sp.price_large_day, sp.price_medium_day, sp.price_small_day,
+               sp.reg_date, u.address, u.name
+        FROM SITTER_POST sp
+                 LEFT JOIN USER u ON sp.user_seq = u.user_seq
+        WHERE sp.PETSIT_SEQ = #{petsitSeq}
+    </select>
+
+    <!-- 리뷰 리스트 불러오기 -->
+    <select id="getReview" resultType="HashMap">
+        SELECT rv.review_seq, rv.review_title, rv.review_content, rv.review_date, rv.reservation_seq, u.email
+        FROM REVIEW rv
+                 LEFT JOIN USER u ON rv.user_seq = u.user_seq
+        WHERE rv.PETSIT_SEQ = #{petsitSeq}
+        ORDER BY petsit_seq LIMIT #{pageStart}, #{perPageNum}
+    </select>
+
+    <!-- 리뷰 총 갯수 가져오기 -->
+    <select id="reviewTotalCount" parameterType="Integer" resultType="Integer">
+        SELECT count(*) FROM REVIEW WHERE PETSIT_SEQ= #{petsitSeq};
+    </select>
+
+    <!-- 예약 요청 저장 -->
+    <insert id="insertReservation" parameterType="HashMap">
+        INSERT INTO RESERVATION (CHECK_IN, CHECK_OUT, RESERVATION_DATE, PRICE, RESERVATION_STATUS, PETSIT_SEQ, USER_SEQ, SITTER_SEQ,
+                                 SMALL_DOG_CNT, MEDIUM_DOG_CNT, LARGE_DOG_CNT)
+        VALUES (#{checkIn}, #{checkOut}, now(), #{price, jdbcType=INTEGER}, 'R', #{petSitSeq, jdbcType=INTEGER}, #{userSeq, jdbcType=INTEGER},
+                #{sitterSeq, jdbcType=INTEGER}, #{smallCnt, jdbcType=INTEGER}, #{mediumCnt, jdbcType=INTEGER}, #{largeCnt, jdbcType=INTEGER})
+    </insert>
+
+    <!-- 시터 게시글을 작성한 시터seq(userSeq) 가져오기 -->
+    <select id="selectSitterSeq" parameterType="Integer" resultType="Integer">
+        SELECT user_seq FROM SITTER_POST WHERE PETSIT_SEQ=#{petSitSeq}
     </select>
 
 </mapper>
