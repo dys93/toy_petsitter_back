@@ -37,12 +37,17 @@ public class Criteria {
     }
 
     public void setPerPageNum(int pageCount) {
+        System.out.println(">>>>>>>>>setPerPageNum: pageCount"+pageCount);
         int count = this.perPageNum;
 
         if(pageCount != count) {
-            this.perPageNum = count;
-        } else {
+            System.out.println(">>>>>>>>>count"+count);
             this.perPageNum = pageCount;
+//            this.perPageNum = count;
+        } else {
+            System.out.println(">>>>>>>>>pageCount"+pageCount);
+//            this.perPageNum = pageCount;
+            this.perPageNum = count;
         }
     }
 }

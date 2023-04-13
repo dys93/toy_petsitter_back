@@ -30,6 +30,7 @@ public class Pagination {
     //데이터의 총 갯수를 구하면 calcData() 메서드를 호출하여 페이징 계산을 한다
     public void setTotalCount(int totalCount) {
         this.totalCount = totalCount;
+        System.out.println(">>>>>>>>>>>>>>totalCount"+totalCount);
         calcData();
     }
 
@@ -37,6 +38,8 @@ public class Pagination {
     private void calcData() {
         //끝 페이지 번호 = (현재 페이지 번호 / 화면에 보여질 페이지 번호의 갯수) * 화면에 보여질 페이지 번호의 갯수
         endPage = (int)(Math.ceil(criteria.getPage() / (double)displayPageNum) * displayPageNum);
+        System.out.println(">>>>>>>>>>>>>>criteria.getPage()"+criteria.getPage());
+        System.out.println(">>>>>>>>>>>>>>displayPageNum"+displayPageNum);
 
         //시작 페이지 번호 = (끝 페이지 번호 - 화면에 보여질 페이지 번호의 갯수) + 1
         startPage = (endPage - displayPageNum) + 1;
