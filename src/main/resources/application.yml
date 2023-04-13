@@ -8,7 +8,7 @@ server:
     include-exception: false
     include-stacktrace: never
     whitelabel:
-      enabled: false
+      enabled: true #경로 틀렸을때 /error로 이동
 
 spring:
   datasource:
