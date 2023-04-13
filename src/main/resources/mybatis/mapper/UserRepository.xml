@@ -3,9 +3,14 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.toy.toy_petsitter_back.repository.UserRepository">
-    <select id="getUserInfo" resultType="HashMap">
-        SELECT * FROM user WHERE user_seq = 1;
+    <!-- 내 정보 -->
+    <select id="getUserInfo" resultType="HashMap" parameterType="Integer">
+        SELECT * FROM user WHERE user_seq = #{userKey, jdbcType=INTEGER}
     </select>
+    <!-- 내 정보 수정 -->
+    <update id="updateUserInfo">
+        UPDATE USER SET phone=#{phone, jdbcType=VARCHAR}, zip_code=#{zipCode, jdbcType=VARCHAR}, address=#{address, jdbcType=VARCHAR}, address_detail=#{addressDetail, jdbcType=VARCHAR} WHERE user_seq = #{userKey}
+    </update>
 
     <select id="getUserList" resultType="HashMap">
         SELECT * FROM user;
@@ -43,5 +48,41 @@
     <update id="lockUser" >
         UPDATE USER SET user_status = 'R', fail_count = #{failCount} WHERE email = #{email}
     </update>
+
+    <!-- 유저키 일치 여부 확인 -->
+    <select id="findUserKey" parameterType="Integer" resultType="HashMap">
+        SELECT * FROM USER WHERE user_seq = #{userSeq}
+    </select>
+
+    <!-- 비밀번호 변경 -->
+    <update id="changePassword">
+        UPDATE USER SET password = #{password} WHERE email = #{email}
+    </update>
+
+    <!-- 토큰 저장 -->
+    <insert id="insertToken">
+        INSERT INTO USER_TOKEN (user_seq, user_token, issued_date) VALUES(#{userKey}, #{refreshToken}, #{issuedDate})
+    </insert>
+
+    <!--R토큰 가져오기 -->
+    <select id="selectToken" parameterType="Integer" resultType="String">
+        SELECT USER_TOKEN FROM USER_TOKEN WHERE user_seq = #{userSeq}
+    </select>
+    <!--R토큰 업데이트 -->
+    <update id="updateToken">
+        UPDATE USER_TOKEN SET user_token = #{refreshToken}, issued_date= #{issuedDate} WHERE user_seq = #{userKey}
+    </update>
+    <!-- issuedDate 가져오기 -->
+    <select id="selectIssuedDate" resultType="String" parameterType="Integer">
+        SELECT ISSUED_DATE FROM USER_TOKEN WHERE USER_SEQ = #{userSeq}
+    </select>
+    <!-- 권한 가져오기 -->
+    <select id="selectAuthority" parameterType="Integer" resultType="String">
+        SELECT AUTHORITY FROM USER WHERE USER_SEQ = #{userSeq}
+    </select>
+    <!-- 이메일 가져오기 -->
+    <select id="selectEmail" resultType="String" parameterType="Integer">
+        SELECT EMAIL FROM USER WHERE USER_SEQ = #{userSeq}
+    </select>
 
 </mapper>
