@@ -60,7 +60,7 @@ public class RestResponse {
     }
 
     public String toJasonString() {
-        return new GsonBuilder().excludeFieldsWithoutExposeAnnotation().serializeNulls().create().toJson(this);
+        return new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").excludeFieldsWithoutExposeAnnotation().serializeNulls().create().toJson(this);
     }
 
     public RestResponse customError(CustomException e) {
