@@ -37,8 +37,8 @@ public class AuthInterceptor implements HandlerInterceptor {
         // CORS 요청 승인처리
         if (Objects.equals(request.getMethod(), "OPTIONS")) return true;
 
-        //권한 확인 필요 x N
-        //토큰 필요 x: 회원가입, 로그인, 메인, 글보기
+        //권한 확인 필요 x
+        //토큰 필요 x: 회원가입, 로그인, 메인, 글보기 N
 
         //권한 확인 필요
         //관리자만: 모든 관리자 메뉴 A
@@ -53,8 +53,8 @@ public class AuthInterceptor implements HandlerInterceptor {
         //getMethodAnnotation()를 사용하여 해당 핸들러 메소드에 사용된 AuthCheck 어노테이션을 가져온 뒤,
         //이를 methodAnnotation 변수에 할당
 
-        //handler가 HandlerMethod타입이 아니거나 || handler에서 호출될 메서드의 어노테이션을 가져와 AuthCheck가 없거나 || AuthCheck 값이 false인 경우 //=토큰체크를 하지 않아야 하는 경우
-        //회원가입이나 로그인 같이 검증이 필요 없는 경우 return true (preHandle에서 false 리턴시 요청 거부)
+        //어노테이션을 붙이지 않았거나 || role이 NONE인 경우
+        //토큰 검증이 필요 없는 경우 return true (preHandle에서 false 리턴시 요청 거부)
         if (methodAnnotation == null || methodAnnotation.role() == AuthCheck.Role.NONE ) {
             System.out.println(">>>>>>>>>>>interceptor_preHandle_토큰검사x");
             return true;
@@ -62,25 +62,39 @@ public class AuthInterceptor implements HandlerInterceptor {
 
         //토큰 디코딩
         DecodedJWT decodeJWT = new JwtService().getDecodedJwt(request);
-        //디코딩 후 가져온 토큰에서 userKey 값을 꺼내고,
-        //DB에서 조회한다 -> 만약 조회 결과가 없다면 마찬가지로 INVALID_TOKEN 에러 발생 시킴
         Integer userKey = Integer.parseInt(decodeJWT.getClaim("userKey").asString());
+        String issuedDate = decodeJWT.getIssuedAt().toString();
+
+        //DB에서 조회 결과가 없다면 INVALID_TOKEN 에러 발생
         if(userRepository.findUserKey(userKey) == null) {
             throw ErrorMessage.INVALID_TOKEN.getException();
         }
 
-        String authority = decodeJWT.getClaim("authority").asString();
+        //DB의 issuedDate와 디코딩한 issuedDate와 같지 않다면(재로그인의 경우) 에러 발생
+        if(!userRepository.selectIssuedDate(userKey).equals(issuedDate)) {
+            throw ErrorMessage.DUPLICATION_LOGIN.getException();
+        }
+
+        //userKey로 DB에서 권한 가져옴
+        String authority = userRepository.selectAuthority(userKey);
         System.out.println(">>>>>>>>>>>>Interceptor_authority"+authority);
+
 
         //관리자 메뉴인 경우
         if(methodAnnotation.role() == AuthCheck.Role.ADMIN) {
-            System.out.println("관리자 메뉴인 경우,, ");
-            if(!authority.equals("A")){ //권한이 관리자가 아닌 경우
-                return false;
+            System.out.println("관리자만 접근 가능한 경우");
+            if(!authority.equals("A")){ //권한이 관리자가 아닌 경우, 권한 불일치 에러 발생
+                throw ErrorMessage.UNMATCHED_AUTHORITY.getException();
             }
-            return true;
         }
 
+        //유저 메뉴인 경우
+        if(methodAnnotation.role() == AuthCheck.Role.USER) {
+            System.out.println("유저만 접근 가능한 경우");
+            if(!authority.equals("U") && !authority.equals("P")){ //권한이 유저가 아닌 경우, 권한 불일치 에러 발생
+                throw ErrorMessage.UNMATCHED_AUTHORITY.getException();
+            }
+        }
         //모든 것이 통과 되었을 경우 true를 리턴
         return true;
 
