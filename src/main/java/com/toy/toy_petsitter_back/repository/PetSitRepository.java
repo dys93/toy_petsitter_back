@@ -22,10 +22,11 @@ public interface PetSitRepository {
     void deleteMyPost(Integer userSeq);
 
     //게시글 목록 가져오기
-    List<HashMap<String, Object>> getPostList(Criteria criteria);
+    List<HashMap<String, Object>> getPostList(HashMap<String, Object> data);
+//    List<HashMap<String, Object>> getPostList(Criteria criteria);
 
     //게시글 총 갯수
-    int totalCount();
+    int totalCount(HashMap<String, Object> data);
 
     //리뷰 총 갯수
     int reviewTotalCount(Integer petsitSeq);

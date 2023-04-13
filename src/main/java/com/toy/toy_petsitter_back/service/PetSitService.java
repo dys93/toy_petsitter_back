@@ -98,18 +98,29 @@ public class PetSitService extends BaseService {
     }
 
     //작성글 리스트 가져오기
-    public HashMap<String, Object> getPostList(Criteria criteria) {
+    public HashMap<String, Object> getPostList(Criteria criteria, String orderBy, String petYn, String pickupYn,
+                                               String largeDogYn, String yardYn, String oldDogYn) {
         Pagination pagination = new Pagination();
         pagination.setCriteria(criteria); //현재 페이지 //한 페이지당 보여 줄 게시글의 갯수
-        pagination.setTotalCount(totalCount()); //총 게시글 수
+        pagination.setTotalCount(totalCount(petYn, pickupYn, largeDogYn, yardYn, oldDogYn)); //총 게시글 수
 
         System.out.println(">>>>>>>>>>>>>>>pagination1:"+ pagination.getTotalCount());
         System.out.println(">>>>>>>>>>>>>>>pagination2:"+ pagination.getStartPage());
         System.out.println(">>>>>>>>>>>>>>>pagination3:"+ pagination.getEndPage());
         System.out.println(">>>>>>>>>>>>>>>pagination4:"+ pagination.getDisplayPageNum());
 
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("pageStart", criteria.getPageStart());
+        data.put("perPageNum", criteria.getPerPageNum());
+        data.put("orderBy", orderBy);
+        if(petYn != "") data.put("petYn", "Y");
+        if(pickupYn != "") data.put("pickupYn", "Y");
+        if(largeDogYn != "") data.put("largeDogYn", "Y");
+        if(yardYn != "") data.put("yardYn", "Y");
+        if(oldDogYn != "") data.put("oldDogYn", "Y");
+
         return new HashMap<>() {{
-            put("list", petSitRepository.getPostList(criteria));
+            put("list", petSitRepository.getPostList(data));
             put("page", criteria.getPage());
             put("totalCount", pagination.getTotalCount());
             put("startPage", pagination.getStartPage());
@@ -118,8 +129,17 @@ public class PetSitService extends BaseService {
     }
 
     //게시글 전체 데이터 갯수 가져오기
-    public Integer totalCount() {
-        return petSitRepository.totalCount();
+    public Integer totalCount(String petYn, String pickupYn,
+                              String largeDogYn, String yardYn, String oldDogYn) {
+
+        HashMap<String, Object> data = new HashMap<>();
+        if(petYn != "") data.put("petYn", "Y");
+        if(pickupYn != "") data.put("pickupYn", "Y");
+        if(largeDogYn != "") data.put("largeDogYn", "Y");
+        if(yardYn != "") data.put("yardYn", "Y");
+        if(oldDogYn != "") data.put("oldDogYn", "Y");
+
+        return petSitRepository.totalCount(data);
     }
 
     //게시글 상세 가져오기

@@ -32,20 +32,44 @@
     <!-- 게시글 리스트 가져오기 -->
     <select id="getPostList" resultType="HashMap">
         SELECT sp.petsit_seq, sp.title, sp.pet_yn, sp.pickup_yn, sp.large_dog_yn, sp.yard_yn, sp.old_dog_yn,
-               sp.price_large, sp.price_medium, sp.price_small, sp.reg_date, u.address, u.address_detail,
+               sp.price_large, sp.price_medium, sp.price_small, sp.price_small_day, sp.reg_date, u.address, u.address_detail,
                (SELECT count(*) from REVIEW rv WHERE rv.petsit_seq = sp.petsit_seq) review_count
         FROM SITTER_POST sp
                  LEFT JOIN USER u
-                 ON sp.user_seq = u.user_seq
-                 LEFT JOIN REVIEW r
-                 ON sp.petsit_seq = r.petsit_seq
-                 WHERE u.user_status = 'U' AND u.post_yn = 'Y' AND sp.delete_yn='N'
-                 ORDER BY petsit_seq LIMIT #{pageStart}, #{perPageNum}
+                           ON sp.user_seq = u.user_seq
+        <where>
+            u.user_status = 'U' AND u.post_yn = 'Y' AND sp.delete_yn='N'
+            <if test="petYn != null"> AND sp.pet_yn = 'Y'</if>
+            <if test="pickupYn != null"> AND sp.pickup_yn = 'Y'</if>
+            <if test="largeDogYn != null"> AND sp.large_dog_yn = 'Y'</if>
+            <if test="yardYn != null"> AND sp.yard_yn = 'Y'</if>
+            <if test="oldDogYn != null"> AND sp.old_dog_yn = 'Y'</if>
+        </where>
+        <choose>
+            <when test="orderBy != null and orderBy.equals('popular')">
+                ORDER BY review_count DESC
+            </when>
+            <when test="orderBy != null and orderBy.equals('price')">
+                ORDER BY sp.price_small ASC
+            </when>
+            <otherwise>
+                ORDER BY sp.reg_date DESC
+            </otherwise>
+        </choose>
+        LIMIT #{pageStart}, #{perPageNum}
     </select>
 
     <!-- 게시글 총 갯수 가져오기 -->
     <select id="totalCount" resultType="Integer">
-        SELECT count(*) FROM SITTER_POST WHERE DELETE_YN='N';
+        SELECT count(*) FROM SITTER_POST sp
+        <where>
+            sp.delete_yn='N'
+            <if test="petYn != null"> AND sp.pet_yn = 'Y'</if>
+            <if test="pickupYn != null"> AND sp.pickup_yn = 'Y'</if>
+            <if test="largeDogYn != null"> AND sp.large_dog_yn = 'Y'</if>
+            <if test="yardYn != null"> AND sp.yard_yn = 'Y'</if>
+            <if test="oldDogYn != null"> AND sp.old_dog_yn = 'Y'</if>
+        </where>
     </select>
 
     <!-- 게시글 작성 상태 변경 -->

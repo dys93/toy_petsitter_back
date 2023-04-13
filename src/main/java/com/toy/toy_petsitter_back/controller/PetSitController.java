@@ -73,10 +73,9 @@ public class PetSitController extends BaseController {
         criteria.setPerPageNum(10);
         criteria.setPage(Integer.parseInt(getParameter("pageNum"))); //현재 페이지
 
-        System.out.println(">>>>>>>>>>>>>>>petSitService.getPostList(criteria)"+petSitService.getPostList(criteria));
-
-
-        return new RestResponse().ok().setBody(petSitService.getPostList(criteria)).responseEntity();
+        return new RestResponse().ok().setBody(petSitService.getPostList(criteria, getParameter("orderBy"), getParameterOrNull("petYn")
+                , getParameterOrNull("pickupYn"), getParameterOrNull("largeDogYn"), getParameterOrNull("yardYn")
+                , getParameterOrNull("oldDogYn"))).responseEntity();
     }
 
     /**
