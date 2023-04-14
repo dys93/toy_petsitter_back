@@ -65,12 +65,12 @@ public class AuthInterceptor implements HandlerInterceptor {
         Integer userKey = Integer.parseInt(decodeJWT.getClaim("userKey").asString());
         String issuedDate = decodeJWT.getIssuedAt().toString();
 
-        //DB에서 조회 결과가 없다면 INVALID_TOKEN 에러 발생
+        //DB에서 userKey 조회 결과가 없다면 INVALID_TOKEN 에러 발생
         if(userRepository.findUserKey(userKey) == null) {
             throw ErrorMessage.INVALID_TOKEN.getException();
         }
 
-        //DB의 issuedDate와 디코딩한 issuedDate와 같지 않다면(재로그인의 경우) 에러 발생
+        //DB의 issuedDate와 디코딩한 issuedDate와 같지 않다면(중복 로그인의 경우) 에러 발생
         if(!userRepository.selectIssuedDate(userKey).equals(issuedDate)) {
             throw ErrorMessage.DUPLICATION_LOGIN.getException();
         }
@@ -84,6 +84,14 @@ public class AuthInterceptor implements HandlerInterceptor {
         if(methodAnnotation.role() == AuthCheck.Role.ADMIN) {
             System.out.println("관리자만 접근 가능한 경우");
             if(!authority.equals("A")){ //권한이 관리자가 아닌 경우, 권한 불일치 에러 발생
+                throw ErrorMessage.UNMATCHED_AUTHORITY.getException();
+            }
+        }
+
+        //펫시터 메뉴인 경우
+        if(methodAnnotation.role() == AuthCheck.Role.PET_SITTER) {
+            System.out.println("펫시터만 접근 가능한 경우");
+            if(!authority.equals("P")){ //권한이 관리자가 아닌 경우, 권한 불일치 에러 발생
                 throw ErrorMessage.UNMATCHED_AUTHORITY.getException();
             }
         }
