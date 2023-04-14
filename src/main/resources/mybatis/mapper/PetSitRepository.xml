@@ -44,6 +44,7 @@
             <if test="largeDogYn != null"> AND sp.large_dog_yn = 'Y'</if>
             <if test="yardYn != null"> AND sp.yard_yn = 'Y'</if>
             <if test="oldDogYn != null"> AND sp.old_dog_yn = 'Y'</if>
+            <if test="search != null"> AND u.address LIKE CONCAT ('%',#{search},'%')</if>
         </where>
         <choose>
             <when test="orderBy != null and orderBy.equals('popular')">
@@ -61,7 +62,7 @@
 
     <!-- 게시글 총 갯수 가져오기 -->
     <select id="totalCount" resultType="Integer">
-        SELECT count(*) FROM SITTER_POST sp
+        SELECT count(*) FROM SITTER_POST sp LEFT JOIN USER u ON sp.user_seq = u.user_seq
         <where>
             sp.delete_yn='N'
             <if test="petYn != null"> AND sp.pet_yn = 'Y'</if>
@@ -69,6 +70,7 @@
             <if test="largeDogYn != null"> AND sp.large_dog_yn = 'Y'</if>
             <if test="yardYn != null"> AND sp.yard_yn = 'Y'</if>
             <if test="oldDogYn != null"> AND sp.old_dog_yn = 'Y'</if>
+            <if test="search != null"> AND u.address LIKE CONCAT ('%',#{search},'%')</if>
         </where>
     </select>
 

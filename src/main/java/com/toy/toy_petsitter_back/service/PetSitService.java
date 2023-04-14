@@ -99,15 +99,10 @@ public class PetSitService extends BaseService {
 
     //작성글 리스트 가져오기
     public HashMap<String, Object> getPostList(Criteria criteria, String orderBy, String petYn, String pickupYn,
-                                               String largeDogYn, String yardYn, String oldDogYn) {
+                                               String largeDogYn, String yardYn, String oldDogYn, String search) {
         Pagination pagination = new Pagination();
         pagination.setCriteria(criteria); //현재 페이지 //한 페이지당 보여 줄 게시글의 갯수
-        pagination.setTotalCount(totalCount(petYn, pickupYn, largeDogYn, yardYn, oldDogYn)); //총 게시글 수
-
-        System.out.println(">>>>>>>>>>>>>>>pagination1:"+ pagination.getTotalCount());
-        System.out.println(">>>>>>>>>>>>>>>pagination2:"+ pagination.getStartPage());
-        System.out.println(">>>>>>>>>>>>>>>pagination3:"+ pagination.getEndPage());
-        System.out.println(">>>>>>>>>>>>>>>pagination4:"+ pagination.getDisplayPageNum());
+        pagination.setTotalCount(totalCount(petYn, pickupYn, largeDogYn, yardYn, oldDogYn, search)); //총 게시글 수
 
         HashMap<String, Object> data = new HashMap<>();
         data.put("pageStart", criteria.getPageStart());
@@ -118,6 +113,7 @@ public class PetSitService extends BaseService {
         if(largeDogYn != "") data.put("largeDogYn", "Y");
         if(yardYn != "") data.put("yardYn", "Y");
         if(oldDogYn != "") data.put("oldDogYn", "Y");
+        if(search != "") data.put("search", search);
 
         return new HashMap<>() {{
             put("list", petSitRepository.getPostList(data));
@@ -130,7 +126,7 @@ public class PetSitService extends BaseService {
 
     //게시글 전체 데이터 갯수 가져오기
     public Integer totalCount(String petYn, String pickupYn,
-                              String largeDogYn, String yardYn, String oldDogYn) {
+                              String largeDogYn, String yardYn, String oldDogYn, String search) {
 
         HashMap<String, Object> data = new HashMap<>();
         if(petYn != "") data.put("petYn", "Y");
@@ -138,6 +134,7 @@ public class PetSitService extends BaseService {
         if(largeDogYn != "") data.put("largeDogYn", "Y");
         if(yardYn != "") data.put("yardYn", "Y");
         if(oldDogYn != "") data.put("oldDogYn", "Y");
+        if(search != "") data.put("search", search);
 
         return petSitRepository.totalCount(data);
     }
@@ -155,8 +152,6 @@ public class PetSitService extends BaseService {
     public HashMap<String, Object> getReview(Criteria criteria, Integer petsitSeq) {
 
         System.out.println(">>>>>>>>>>getReview() Service"+criteria);
-
-        System.out.println(">>>>>>>>>>리뷰 리스트 가져오기criteria.getPerPageNum()"+criteria.getPerPageNum());
 
         Pagination pagination = new Pagination();
         pagination.setCriteria(criteria); //현재 페이지 //한 페이지당 보여 줄 게시글의 갯수

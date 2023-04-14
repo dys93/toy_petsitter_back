@@ -75,7 +75,7 @@ public class PetSitController extends BaseController {
 
         return new RestResponse().ok().setBody(petSitService.getPostList(criteria, getParameter("orderBy"), getParameterOrNull("petYn")
                 , getParameterOrNull("pickupYn"), getParameterOrNull("largeDogYn"), getParameterOrNull("yardYn")
-                , getParameterOrNull("oldDogYn"))).responseEntity();
+                , getParameterOrNull("oldDogYn"), getParameterOrNull("search"))).responseEntity();
     }
 
     /**
