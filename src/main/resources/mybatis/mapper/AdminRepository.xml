@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.toy.toy_petsitter_back.repository.AdminRepository">
+    <!-- 회원 리스트 가져오기 -->
+    <select id="getUserManageList" resultType="HashMap">
+        SELECT user_seq, authority, email, name, phone, address, address_detail, reg_date, last_login, withdrawal_yn,
+               withdrawal_date, user_status, fail_count FROM USER
+                 WHERE AUTHORITY = 'N' AND APPROVAL_STATUS ='U' LIMIT #{pageStart}, #{perPageNum}
+    </select>
+
+    <!-- 회원 리스트 총 수 -->
+    <select id="userTotalCount" resultType="Integer">
+        SELECT count(*) FROM USER WHERE AUTHORITY = 'N' AND APPROVAL_STATUS ='U';
+    </select>
+
+    <!-- 유저/시터 잠금 해제 -->
+    <update id="unlockUser" parameterType="Integer">
+        UPDATE USER SET USER_STATUS ='U', FAIL_COUNT=0, UNLOCK_DATE=now() WHERE USER_SEQ = #{userSeq};
+    </update>
+
+    <!-- 시터 리스트 가져오기 -->
+    <select id="getSitterList" resultType="HashMap">
+        SELECT user_seq, authority, email, name, phone, address, address_detail, approval_status, approval_date, sitter_account,
+               sitter_bank, sitter_experience, experience_detail, pet_experience, post_yn, last_login, withdrawal_yn,
+               withdrawal_date, user_status, fail_count FROM USER
+        WHERE APPROVAL_STATUS = 'C' OR APPROVAL_STATUS = 'A' LIMIT #{pageStart}, #{perPageNum}
+    </select>
+
+    <!-- 시터 리스트 총 수 -->
+    <select id="sitterTotalCount" resultType="Integer">
+        SELECT count(*) FROM USER WHERE APPROVAL_STATUS = 'C' OR APPROVAL_STATUS = 'A';
+    </select>
+
+    <!-- 시터 상세 정보 가져오기 -->
+    <select id="getSitterDetail" resultType="HashMap" parameterType="Integer">
+        SELECT sitter_account, sitter_bank, sitter_experience, experience_detail, pet_experience
+        FROM USER
+        WHERE USER_SEQ = #{userSeq}
+    </select>
+
+    <!-- 시터 승인 -->
+    <update id="sitterApproval" parameterType="Integer">
+        UPDATE USER SET AUTHORITY='P',APPROVAL_STATUS='A', APPROVAL_DATE= now() WHERE USER_SEQ = #{userSeq}
+    </update>
+
+    <!-- 관리자 예약 리스트 가져오기 -->
+    <select id="getReservationManageList" resultType="HashMap">
+        SELECT rv.reservation_seq, rv.check_in, rv.check_out, rv.reservation_date, rv.price, rv.reservation_status, rv.sitter_seq,
+               rv.user_seq, u.email, (SELECT u.email FROM USER u WHERE u.user_seq = rv.sitter_seq) as sitter_email
+        FROM RESERVATION rv
+                 LEFT JOIN USER u ON rv.user_seq = u.user_seq
+        <where>
+            <if test="type != null and type.equals('sitter')">AND (SELECT u.email FROM USER u WHERE u.user_seq = rv.sitter_seq) LIKE CONCAT ('%',#{search},'%') </if>
+            <if test="type != null and type.equals('user')">AND u.email LIKE CONCAT ('%',#{search},'%') </if>
+            <if test="type != null and type.equals('status')">AND rv.reservation_status =#{search} </if>
+            <if test="type != null and type.equals('seq')">AND rv.reservation_seq LIKE CONCAT ('%',#{search},'%') </if>
+        </where>
+        <choose>
+            <when test="orderBy != null and orderBy.equals('checkIn')">
+                ORDER BY rv.check_in ASC
+            </when>
+            <when test="orderBy != null and orderBy.equals('price')">
+                ORDER BY rv.price DESC
+            </when>
+            <otherwise>
+                ORDER BY rv.reservation_date DESC
+            </otherwise>
+        </choose>
+                 LIMIT #{pageStart}, #{perPageNum}
+    </select>
+
+    <!-- 관리자 예약 리스트 총 수 -->
+    <select id="reservationManageTotalCount" resultType="Integer">
+        SELECT COUNT(*) TOTAL_ITEM_COUNT
+        FROM
+        (SELECT rv.reservation_seq, rv.check_in, rv.check_out, rv.reservation_date, rv.price, rv.reservation_status, rv.sitter_seq,
+        rv.user_seq, u.email, (SELECT u.email FROM USER u WHERE u.user_seq = rv.sitter_seq) as sitter_email
+        FROM RESERVATION rv
+        LEFT JOIN USER u ON rv.user_seq = u.user_seq
+        <where>
+            <if test="type != null and type.equals('sitter')">AND (SELECT u.email FROM USER u WHERE u.user_seq = rv.sitter_seq) LIKE CONCAT ('%',#{search},'%') </if>
+            <if test="type != null and type.equals('user')">AND u.email LIKE CONCAT ('%',#{search},'%') </if>
+            <if test="type != null and type.equals('status')">AND rv.reservation_status =#{search} </if>
+            <if test="type != null and type.equals('seq')">AND rv.reservation_seq LIKE CONCAT ('%',#{search},'%') </if>
+        </where>
+        ) t1
+    </select>
+
+    <!-- 관리자 환불 처리 -->
+    <update id="refundConfirm" parameterType="Integer">
+        UPDATE PAYMENT SET REFUND_YN = 'Y', REFUND_DATE = now() WHERE RESERVATION_SEQ = #{reservationSeq}
+    </update>
+
+</mapper>
