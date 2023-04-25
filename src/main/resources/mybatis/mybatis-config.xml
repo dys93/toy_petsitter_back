@@ -6,5 +6,6 @@
     <settings>
         <setting name="jdbcTypeForNull" value="NULL"/> <!-- 데이터가 null로 전달이 되었으면 빈칸으로 인지말고 null로 인식해라(value에 들어가는 NULL은 무조건 대문자로 기입) -->
         <setting name="mapUnderscoreToCamelCase" value="true"/> <!-- DB 조회결과를 snake_case -> camelCase 변환해주는 옵션 -->
-    </settings>
+        <setting name="callSettersOnNulls" value="true"/>
+</settings>
 </configuration>
