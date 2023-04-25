@@ -14,10 +14,10 @@ public class BaseController extends LogService {
     //파라미터 값 가져올 때 사용(null일 경우 에러발생)
     @SneakyThrows
     public String getParameter(String id) {
+        System.out.println(">>>>>>>>몇번쨴지 확인용");
         String value = getRequest().getParameter(id);
         if(value == null) {
-            //오류 테스트
-            throw ErrorMessage.UNMATCHED_AUTHORITY.getException();
+            throw ErrorMessage.PARAMETER_NONE.getException();
         }
         return value;
     }
