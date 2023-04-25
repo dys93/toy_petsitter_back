@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.toy.toy_petsitter_back.repository.DashboardRepository">
+
+    <!-- 오늘 총 매칭 건수 -->
+    <select id="selectMatchingCnt" resultType="Integer">
+        SELECT COUNT(*) FROM RESERVATION WHERE DATE_FORMAT(reservation_date, '%Y-%m-%d') = CURDATE();
+    </select>
+
+    <!-- 오늘 수락 건수 -->
+    <select id="selectAcceptCnt" resultType="Integer">
+        SELECT COUNT(*) FROM RESERVATION WHERE DATE_FORMAT(reservation_date, '%Y-%m-%d') = CURDATE() AND reservation_Status='RA';
+    </select>
+
+    <!-- 오늘 거절 건수 -->
+    <select id="selectRejectCnt" resultType="Integer">
+        SELECT COUNT(*) FROM RESERVATION WHERE DATE_FORMAT(modi_date, '%Y-%m-%d') = CURDATE() AND reservation_Status='RR';
+    </select>
+
+    <!-- 오늘 결제 건수 -->
+    <select id="selectPaymentCnt" resultType="Integer">
+        SELECT COUNT(*) FROM RESERVATION WHERE DATE_FORMAT(modi_date, '%Y-%m-%d') = CURDATE() AND reservation_Status='PC';
+    </select>
+
+    <!-- 오늘 결제 cnt -->
+    <select id="selectCntToday" resultType="Integer">
+        SELECT COUNT(*) FROM payment WHERE DATE_FORMAT(payment_date, '%Y-%m-%d') = CURDATE()
+    </select>
+    <!-- 오늘-1 결제 cnt -->
+    <select id="selectCntYesterday" resultType="Integer">
+        SELECT COUNT(*) FROM payment WHERE DATE_FORMAT(payment_date, '%Y-%m-%d') = CURDATE()- INTERVAL 1 DAY;
+    </select>
+    <!-- 오늘-2 결제 cnt -->
+    <select id="selectCntBeforeYesterday" resultType="Integer">
+        SELECT COUNT(*) FROM payment WHERE DATE_FORMAT(payment_date, '%Y-%m-%d') = CURDATE()- INTERVAL 2 DAY;
+    </select>
+
+    <!-- 오늘 총 결제 금액 -->
+    <select id="selectAmountToday" resultType="String">
+        SELECT SUM(payment_amount) FROM payment WHERE DATE_FORMAT(payment_date, '%Y-%m-%d') = CURDATE();
+    </select>
+    <!-- 오늘-1 총 결제 금액 -->
+    <select id="selectAmountTodayOne" resultType="String">
+        SELECT SUM(payment_amount) FROM payment WHERE DATE_FORMAT(payment_date, '%Y-%m-%d') = CURDATE()- INTERVAL 1 DAY;
+    </select>
+    <!-- 오늘-2 총 결제 금액 -->
+    <select id="selectAmountTodayTwo" resultType="String">
+        SELECT SUM(payment_amount) FROM payment WHERE DATE_FORMAT(payment_date, '%Y-%m-%d') = CURDATE()- INTERVAL 2 DAY;
+    </select>
+    <!-- 오늘-3 총 결제 금액 -->
+    <select id="selectAmountTodayThree" resultType="String">
+        SELECT SUM(payment_amount) FROM payment WHERE DATE_FORMAT(payment_date, '%Y-%m-%d') = CURDATE()- INTERVAL 3 DAY;
+    </select>
+    <!-- 오늘-4 총 결제 금액 -->
+    <select id="selectAmountTodayFour" resultType="String">
+        SELECT SUM(payment_amount) FROM payment WHERE DATE_FORMAT(payment_date, '%Y-%m-%d') = CURDATE()- INTERVAL 4 DAY;
+    </select>
+
+    <!-- 저번달 회원가입 총 명수 -->
+    <select id="lastMonthUserAll" resultType="String">
+        SELECT COUNT(*) FROM user WHERE reg_date > last_day(now() - interval 2 month) and reg_date <![CDATA[<=]]> last_day(now() - interval 1 month);
+    </select>
+    <!-- 저번달 회원가입 일반회원 명수 -->
+    <select id="lastMonthUserOnly" resultType="String">
+        SELECT COUNT(*) FROM user WHERE reg_date > last_day(now() - interval 2 month) and reg_date <![CDATA[<=]]> last_day(now() - interval 1 month) AND approval_status ='U';
+    </select>
+
+    <!-- 이번달 회원가입 총 명수 -->
+    <select id="thisMonthUserAll" resultType="String">
+        SELECT COUNT(*) FROM user WHERE reg_date > last_day(now() - interval 1 month) and reg_date <![CDATA[<=]]> now() ;
+    </select>
+    <!-- 이번달 회원가입 일반회원 명수 -->
+    <select id="thisMonthUserOnly" resultType="String">
+        SELECT COUNT(*) FROM user WHERE reg_date > last_day(now() - interval 2 month) and reg_date <![CDATA[<=]]> last_day(now() - interval 1 month) AND approval_status ='U';
+    </select>
+
+
+
+</mapper>
