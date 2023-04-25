@@ -201,4 +201,124 @@ public class PetSitService extends BaseService {
 
     }
 
+    //예약 내역 리스트 가져오기
+    public HashMap<String, Object> getReservationList(Criteria criteria) {
+        Pagination pagination = new Pagination();
+        pagination.setCriteria(criteria); //현재 페이지 //한 페이지당 보여 줄 게시글의 갯수
+        pagination.setTotalCount(reservationTotalCount(getUserKey())); //총 예약 수
+
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("pageStart", criteria.getPageStart());
+        data.put("perPageNum", criteria.getPerPageNum());
+        data.put("userSeq", getUserKey());
+
+        return new HashMap<>() {{
+            put("reservationList", petSitRepository.getReservationList(data));
+            put("page", criteria.getPage());
+            put("totalCount", pagination.getTotalCount());
+            put("startPage", pagination.getStartPage());
+            put("endPage", pagination.getEndPage());
+        }};
+    }
+
+    //예약 내역 리스트 전체 갯수 가져오기
+    public Integer reservationTotalCount(Integer userSeq) {
+        return petSitRepository.totalReservationCount(userSeq);
+    }
+
+    //결제하기
+    public HashMap<String, Object> payment(Integer reservationSeq, String paymentType) {
+        System.out.println(">>>>>>>>결제하기 Service");
+        // reservation_seq로 관련 데이터 가져오기 : 유저 email, 금액
+        HashMap<String, Object> resultReservation = petSitRepository.getReservationInfo(reservationSeq, getUserKey());
+        System.out.println(">>>>>>>>>>>>>>>resultReservation"+resultReservation);
+        resultReservation.put("paymentType",paymentType);
+
+        petSitRepository.insertPayment(resultReservation);
+        petSitRepository.changeReservationStatus("PC" ,reservationSeq);
+        return new HashMap<>();
+    }
+
+    //취소하기
+    public HashMap<String, Object> cancelReservation(Integer reservationSeq) {
+        System.out.println(">>>>>>>>취소하기 Service");
+        // reservation_seq로 예약 데이터
+        HashMap<String, Object> resultReservation = petSitRepository.getReservationInfoOnly(reservationSeq);
+        System.out.println(">>>>>>>>>>>>>>>resultReservation"+resultReservation);
+
+        if(resultReservation.get("reservation_status").equals("PC")) {
+            System.out.println(">>>>>>>>>>>>>>>환불 필요");
+            //환불 필요: 결제 상태 취소Y, 환불 N. (환불 완료 후 환불 Y로 변경)
+            petSitRepository.refund(reservationSeq);
+            //환불 신청으로 변경
+            petSitRepository.changeReservationStatus("RRQ", reservationSeq);
+        } else {
+            System.out.println(">>>>>>>>>>>>>>>환불 불필요");
+            //취소로 상태 변경
+            petSitRepository.changeReservationStatus("RCC", reservationSeq);
+        }
+        return new HashMap<>();
+    }
+
+    //리뷰 작성하기
+    public HashMap<String, Object> review(Integer reservationSeq, String reviewContent) {
+        System.out.println(">>>>>>>>리뷰 작성하기 Service");
+
+        // reservation_seq로 관련 데이터 가져오기
+        HashMap<String, Object> resultReservation = petSitRepository.getReservationInfo(reservationSeq, getUserKey());
+        resultReservation.put("reviewContent", reviewContent);
+
+        System.out.println(">>>>>>>>>>>>>>>resultReservation"+resultReservation);
+
+        //리뷰 작성
+        petSitRepository.review(resultReservation);
+        //예약 상태 변경
+        petSitRepository.changeReservationStatus("RVC", reservationSeq);
+
+        return new HashMap<>();
+    }
+
+    //펫시터 예약 내역 리스트 가져오기
+    public HashMap<String, Object> getReservationManageList(Criteria criteria) {
+        System.out.println(">>>>>>>>펫시터 예약 내역 리스트 가져오기 Service");
+        Pagination pagination = new Pagination();
+        pagination.setCriteria(criteria); //현재 페이지 //한 페이지당 보여 줄 게시글의 갯수
+        pagination.setTotalCount(reservationManageTotalCount(getUserKey())); //총 예약 수
+
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("pageStart", criteria.getPageStart());
+        data.put("perPageNum", criteria.getPerPageNum());
+        data.put("sitterSeq", getUserKey());
+
+        return new HashMap<>() {{
+            put("reservationList", petSitRepository.getReservationManageList(data));
+            put("page", criteria.getPage());
+            put("totalCount", pagination.getTotalCount());
+            put("startPage", pagination.getStartPage());
+            put("endPage", pagination.getEndPage());
+        }};
+    }
+
+    //시터 예약 내역 리스트 전체 갯수 가져오기
+    public Integer reservationManageTotalCount(Integer userSeq) {
+        System.out.println(">>>>>>>>시터 예약 내역 리스트 전체 갯수 가져오기 Service");
+        return petSitRepository.totalReservationManageCount(userSeq);
+    }
+
+    //수락 / 거절 선택
+    //취소하기
+    public HashMap<String, Object> confirmReservation(Integer reservationSeq, String confirm) {
+        System.out.println(">>>>>>>>수락 / 거절 선택 Service");
+
+
+        if(confirm.equals("Y")) {
+            //요청 수락 상태로 변경
+            petSitRepository.changeReservationStatus("RA", reservationSeq);
+        } else {
+            //요청 거절 상태로 변경
+            petSitRepository.changeReservationStatus("RR", reservationSeq);
+        }
+
+        return new HashMap<>();
+    }
 }

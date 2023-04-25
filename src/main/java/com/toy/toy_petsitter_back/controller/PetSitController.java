@@ -111,9 +111,81 @@ public class PetSitController extends BaseController {
     @AuthCheck(role = AuthCheck.Role.USER)
     @RequestMapping(value = "/requestReservation", method = RequestMethod.POST)
     public ResponseEntity<?> requestReservation() {
+        System.out.println(">>>>>>>>>>>>>>>>>>>>>예약 요청 Controller");
         return new RestResponse().ok().setBody(petSitService.requestReservation(getParameter("checkIn"), getParameter("checkOut"),
                 Integer.parseInt(getParameter("price")), Integer.parseInt(getParameter("smallCnt")), Integer.parseInt(getParameter("mediumCnt")),
                 Integer.parseInt(getParameter("largeCnt")), Integer.parseInt(getParameter("petSitSeq")))).responseEntity();
+    }
+
+    /**
+     * 예약 리스트 가져오기
+     */
+    @AuthCheck(role = AuthCheck.Role.USER)
+    @RequestMapping(value = "/getReservationList", method = RequestMethod.GET)
+    public ResponseEntity<?> getReservationList() {
+
+        System.out.println(">>>>>>>>>>>>>>>>>>>>>예약 리스트 가져오기 Controller");
+        Criteria criteria = new Criteria();
+        criteria.setPerPageNum(5);
+        criteria.setPage(Integer.parseInt(getParameter("pageNum"))); //현재 페이지
+
+        System.out.println(">>>>>>>>>>>>>>>pageNum"+getParameter("pageNum"));
+
+        return new RestResponse().ok().setBody(petSitService.getReservationList(criteria)).responseEntity();
+    }
+
+    /**
+     * 결제하기
+     */
+    @AuthCheck(role = AuthCheck.Role.USER)
+    @RequestMapping(value = "/payment", method = RequestMethod.POST)
+    public ResponseEntity<?> payment() {
+        System.out.println(">>>>>>>>>>>>>>>>>>>>>결제 Controller");
+        return new RestResponse().ok().setBody(petSitService.payment(Integer.parseInt(getParameter("reservationSeq")), getParameter("paymentType"))).responseEntity();
+    }
+
+    /**
+     * 취소하기
+     */
+    @AuthCheck(role = AuthCheck.Role.USER)
+    @RequestMapping(value = "/cancelReservation", method = RequestMethod.PUT)
+    public ResponseEntity<?> cancelReservation() {
+        System.out.println(">>>>>>>>>>>>>>>>>>>>>취소하기 Controller");
+        return new RestResponse().ok().setBody(petSitService.cancelReservation(Integer.parseInt(getParameter("reservationSeq")))).responseEntity();
+    }
+
+    /**
+     * 후기쓰기
+     */
+    @AuthCheck(role = AuthCheck.Role.USER)
+    @RequestMapping(value = "/review", method = RequestMethod.POST)
+    public ResponseEntity<?> review() {
+        System.out.println(">>>>>>>>>>>>>>>>>>>>>후기쓰기 Controller");
+        return new RestResponse().ok().setBody(petSitService.review(Integer.parseInt(getParameter("reservationSeq")), getParameter("reviewContent"))).responseEntity();
+    }
+
+    /**
+     * 펫시터 예약 리스트
+     */
+    @AuthCheck(role = AuthCheck.Role.PET_SITTER)
+    @RequestMapping(value = "/getReservationManageList", method = RequestMethod.GET)
+    public ResponseEntity<?> getReservationManageList() {
+        System.out.println(">>>>>>>>>>>>>>>>>>>>>펫시터 예약 리스트 가져오기 Controller");
+        Criteria criteria = new Criteria();
+        criteria.setPerPageNum(5);
+        criteria.setPage(Integer.parseInt(getParameter("pageNum"))); //현재 페이지
+
+        return new RestResponse().ok().setBody(petSitService.getReservationManageList(criteria)).responseEntity();
+    }
+
+    /**
+     * 예약 수락/거절
+     */
+    @AuthCheck(role = AuthCheck.Role.PET_SITTER)
+    @RequestMapping(value = "/confirmReservation", method = RequestMethod.PUT)
+    public ResponseEntity<?> confirmReservation() {
+        System.out.println(">>>>>>>>>>>>>>>>>>>>>예약 수락/거절  Controller");
+        return new RestResponse().ok().setBody(petSitService.confirmReservation(Integer.parseInt(getParameter("reservationSeq")), getParameter("confirm"))).responseEntity();
     }
 
 }

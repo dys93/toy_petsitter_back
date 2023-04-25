@@ -46,4 +46,33 @@ public interface PetSitRepository {
     //시터 seq 가져오기
     int selectSitterSeq(Integer petSitSeq);
 
+    //예약 리스트 가져오기
+    List<HashMap<String, Object>> getReservationList(HashMap<String, Object> data);
+
+    //예약 내역 가져오기(유저 정보 포함)
+    HashMap<String, Object> getReservationInfo(Integer reservationSeq, Integer userSeq);
+
+    //예약 내역 가져오기
+    HashMap<String, Object> getReservationInfoOnly(Integer reservationSeq);
+
+    //총 예약 수
+    int totalReservationCount(Integer userSeq);
+
+    //결제하기
+    void insertPayment(HashMap<String, Object> data);
+
+    //예약 상태 변경
+    void changeReservationStatus(String reservationStatus, Integer reservationSeq);
+
+    //결제 환불
+    void refund(Integer reservationSeq);
+
+    //리뷰 작성
+    void review(HashMap<String, Object> data);
+
+    //시터 예약 리스트 가져오기
+    List<HashMap<String, Object>> getReservationManageList(HashMap<String, Object> data);
+
+    //시터 총 예약 수
+    int totalReservationManageCount(Integer userSeq);
 }

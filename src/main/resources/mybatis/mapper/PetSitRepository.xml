@@ -91,7 +91,7 @@
 
     <!-- 리뷰 리스트 불러오기 -->
     <select id="getReview" resultType="HashMap">
-        SELECT rv.review_seq, rv.review_title, rv.review_content, rv.review_date, rv.reservation_seq, u.email
+        SELECT rv.review_seq, rv.review_content, rv.review_date, rv.reservation_seq, u.email
         FROM REVIEW rv
                  LEFT JOIN USER u ON rv.user_seq = u.user_seq
         WHERE rv.PETSIT_SEQ = #{petsitSeq}
@@ -114,6 +114,61 @@
     <!-- 시터 게시글을 작성한 시터seq(userSeq) 가져오기 -->
     <select id="selectSitterSeq" parameterType="Integer" resultType="Integer">
         SELECT user_seq FROM SITTER_POST WHERE PETSIT_SEQ=#{petSitSeq}
+    </select>
+
+    <!-- 예약 리스트 가져오기 -->
+    <select id="getReservationList" resultType="HashMap">
+        SELECT * FROM RESERVATION WHERE user_seq =#{userSeq} LIMIT #{pageStart}, #{perPageNum}
+    </select>
+
+    <!-- 총 예약 수 가져오기 -->
+    <select id="totalReservationCount" resultType="Integer">
+        SELECT count(*) FROM RESERVATION WHERE user_seq = #{userSeq}
+    </select>
+
+    <!-- 예약 내역 가져오기 -->
+    <select id="getReservationInfo" resultType="HashMap" parameterType="Integer">
+        SELECT rv.price, u.email, rv.reservation_seq, rv.reservation_status, rv.petsit_seq, rv.user_seq FROM RESERVATION rv
+        LEFT JOIN USER u ON rv.user_seq = u.user_seq
+        WHERE rv.reservation_seq =#{reservationSeq} AND rv.user_seq =#{userSeq}
+    </select>
+
+    <select id="getReservationInfoOnly" resultType="HashMap" parameterType="Integer">
+        SELECT price, reservation_seq, reservation_status, petsit_seq, user_seq
+        FROM RESERVATION
+        WHERE reservation_seq =#{reservationSeq}
+    </select>
+
+    <!-- 결제하기 -->
+    <insert id="insertPayment">
+        INSERT INTO PAYMENT (RESERVATION_SEQ, PAYMENT_NAME, PAYMENT_AMOUNT, PAYMENT_TYPE, PAYMENT_DATE)
+                VALUES (#{reservation_seq}, #{email}, #{price}, #{paymentType}, now())
+    </insert>
+
+    <!-- 예약 상태 변경 -->
+    <update id="changeReservationStatus">
+        UPDATE RESERVATION SET RESERVATION_STATUS =#{reservationStatus}, MODI_DATE=now() WHERE RESERVATION_SEQ =#{reservationSeq}
+    </update>
+
+    <!-- 환불 신청-->
+    <update id="refund">
+        UPDATE PAYMENT SET CANCEL_YN ='Y', CANCEL_DATE= now(), REFUND_YN ='N' WHERE RESERVATION_SEQ =#{reservationSeq}
+    </update>
+
+    <!-- 리뷰 작성 -->
+    <insert id="review" parameterType="HashMap">
+        INSERT INTO REVIEW (REVIEW_CONTENT, REVIEW_DATE, USER_SEQ, RESERVATION_SEQ, PETSIT_SEQ)
+                VALUES (#{reviewContent}, now(), #{user_seq}, #{reservation_seq}, #{petsit_seq})
+    </insert>
+
+    <!-- 펫시터 예약 리스트 가져오기 -->
+    <select id="getReservationManageList" resultType="HashMap">
+        SELECT * FROM RESERVATION WHERE sitter_seq =#{sitterSeq} LIMIT #{pageStart}, #{perPageNum}
+    </select>
+
+    <!-- 펫시터 총 예약 수 가져오기 -->
+    <select id="totalReservationManageCount" resultType="Integer">
+        SELECT count(*) FROM RESERVATION WHERE sitter_seq = #{sitterSeq}
     </select>
 
 </mapper>
