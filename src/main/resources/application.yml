@@ -17,6 +17,21 @@ spring:
     username: root
     password: password
     mapper-locations: classpath:mybatis/mapper/*.xml
+  mail:
+    host: smtp.naver.com
+    port: 465 #587
+    username: lyj3637@naver.com
+    password: Wndls1907!
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.ssl.enable: true
+
+google:
+  recaptcha:
+    key:
+      site: 6LelnLUlAAAAAECPwe7R9JadrtQzcK3K4CWUb9TR
+      secret: 6LelnLUlAAAAALFU-Eby97vn24gfbaZ3ArHQRTQu
+      url: https://www.google.com/recaptcha/api/siteverify
 
 mybatis:
   configuration:
@@ -29,3 +44,5 @@ mybatis:
 secret:
   aeskey256: S&*@F2pd<#/dsSEc_t1!s&dcP^d@fL1@ #32자리
   ivspec: Gk_sfj#5%FspM0#+ #16자리
+
+

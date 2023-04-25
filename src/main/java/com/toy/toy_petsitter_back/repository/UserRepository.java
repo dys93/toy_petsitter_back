@@ -55,4 +55,22 @@ public interface UserRepository {
     //이메일 가져오기
     String selectEmail(Integer userSeq);
 
+    //마지막 로그인 일자 update
+    void updateLastLogin(Integer userSeq);
+
+    //이메일 체크
+    String checkEmail(String email);
+
+    //락 해제
+    void unlock(String email);
+
+    //계정 탈퇴
+    void withdrawal(Integer userSeq);
+
+    //계정 탈퇴 시터 확인
+    String checkWithdrawal(Integer userSeq);
+
+    //계정 탈퇴 유저 확인
+    String checkUserWithdrawal(Integer userSeq);
+
 }

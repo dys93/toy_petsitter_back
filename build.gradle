@@ -26,6 +26,10 @@ dependencies {
 	implementation 'org.bgee.log4jdbc-log4j2:log4jdbc-log4j2-jdbc4.1:1.16'
 
 	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.0'
+//	implementation 'de.vinado.spring:dkim-javamail:1.2.2'
+//	implementation 'de.vinado.boot:mail-extensions-dkim-javamail-spring-boot-starter:2.0.0'
+//    implementation 'clj-captcha:clj-captcha:0.1.1'
+//	implementation 'matcha:matcha:0.1.0'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.projectlombok:lombok:1.18.22'
@@ -43,6 +47,15 @@ dependencies {
 	implementation 'com.auth0:java-jwt:4.0.0'
 
 //	implementation 'ch.qos.logback:logback-classic:1.2.8'
+
+	//이메일 인증
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+	//구글 reCaptcha
+	implementation 'net.tanesha.recaptcha4j:recaptcha4j:0.0.8'
+	implementation 'javax.json:javax.json-api:1.1.4'
+	implementation 'org.glassfish:javax.json:1.1.4'
+
 }
 
 tasks.named('test') {

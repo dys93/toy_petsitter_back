@@ -1,20 +1,28 @@
 package com.toy.toy_petsitter_back.service;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.toy.toy_petsitter_back.DTO.Criteria;
 import com.toy.toy_petsitter_back.DTO.Member;
 import com.toy.toy_petsitter_back.auth.JwtService;
+import com.toy.toy_petsitter_back.config.RecaptchaConfig;
 import com.toy.toy_petsitter_back.exception.ErrorMessage;
 import com.toy.toy_petsitter_back.repository.UserRepository;
 import com.toy.toy_petsitter_back.util.Crypto;
 import lombok.SneakyThrows;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.net.ssl.HttpsURLConnection;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -23,11 +31,18 @@ import java.util.Objects;
 @Service
 public class UserService extends BaseService {
 
-    UserService(UserRepository userRepository) {
+    UserService(UserRepository userRepository, JavaMailSender mailSender, RecaptchaConfig recaptchaConfig) {
         this.userRepository = userRepository;
+        this.mailSender = mailSender;
+
+        this.recaptchaConfig = recaptchaConfig;
     }
 
     private final UserRepository userRepository ;
+
+    private JavaMailSender mailSender;
+
+    final RecaptchaConfig recaptchaConfig;
 
     @Transactional
     public HashMap<String, Object> getUserList() {
@@ -45,8 +60,10 @@ public class UserService extends BaseService {
     //회원가입
     @Transactional
     @SneakyThrows
-    public HashMap<String, Object> signUp(String authority, String id, String pwd, String name, String phone, String zipCode,
-                                          String address, String address2, String petYn, String experience, String exDetail) {
+    public HashMap<String, Object> signUp(String authority, String id, String pwd, String name, String phone, String zipCode, String sitterBank, String sitterAccount
+                                          ,String address, String address2, String petYn, String experience, String exDetail, String approvalStatus) {
+
+        System.out.println(">>>>>>>>>>>>>>>>>>회원가입 phone"+phone);
 
         //이미 존재하는 아이디인 경우 오류
         if(userRepository.checkId(id) != null) throw ErrorMessage.ALREADY_ID.getException();
@@ -68,7 +85,9 @@ public class UserService extends BaseService {
         data.put("petExperience", petYn);
         data.put("sitterExperience", experience);
         data.put("experienceDetail", exDetail);
-
+        data.put("approvalStatus", approvalStatus);
+        data.put("sitterBank", sitterBank);
+        data.put("sitterAccount", sitterAccount);
         //회원정보 저장
         userRepository.insertUser(data);
 
@@ -78,7 +97,7 @@ public class UserService extends BaseService {
     //로그인
     @SneakyThrows
     public HashMap<String, Object> login(String id, String pwd) {
-        //회원 데이터 조회
+        //회원 데이터 조회(이메일 존재 여부 및 탈퇴한 아이디가 아닐 시 조회됨)
         HashMap<String, Object> resultUser = userRepository.getLoginInfoHash(id);
 
         //존재하지 않는 아이디면 로그인 실패
@@ -125,6 +144,9 @@ public class UserService extends BaseService {
             System.out.println(">>>>>>>>>>>refreshToken & issuedDate update");
         }
 
+        //마지막 로그인 일자 update
+        userRepository.updateLastLogin(Integer.parseInt(resultUser.get("user_seq").toString()));
+
         return result;
     }
 
@@ -136,9 +158,8 @@ public class UserService extends BaseService {
         String email = userRepository.selectEmail(getUserKey());
         System.out.println(">>>>>>>>>>>>>>>>>>>changePassword_selectEmail(): "+email);
 
-        //메일 넣어서 변경
         //새로운 비밀번호
-        String newPwd = Crypto.encodeSHA256(pwd + email.substring(0, 4));
+        String newPwd = Crypto.encodeSHA256(pwd);
         System.out.println(">>>>>>>>>>>>>>>>>changePassword_newPwd"+newPwd);
 
         //비밀번호 변경
@@ -193,7 +214,7 @@ public class UserService extends BaseService {
         if(!refreshToken.equals(refreshTokenDb)){
             //일치하지 않는 경우 => 에러 응답
             System.out.println(">>>>>>>>>>>>>>>>>>>R토큰 끼리 일치하지 않는 경우 에러 응답");
-            ErrorMessage.INVALID_TOKEN.getException();
+            throw ErrorMessage.INVALID_TOKEN.getException();
         }
         //일치하는 경우 => access토큰, refresh토큰 갱신 및 응답
         Member member = new Member();
@@ -226,4 +247,137 @@ public class UserService extends BaseService {
            put("authority", authority);
         }};
     }
+
+    //이메일 발송
+    @Transactional
+    @SneakyThrows
+    public HashMap<String, Object> sendEmail(String email) {
+
+        System.out.println(">>>>>>>>>>sendEmail() UserService");
+
+        //DB에 있는 이메일 주소인지 체크
+        String emailId = userRepository.checkEmail(email);
+        if(emailId == null) {
+            throw ErrorMessage.NONE_EXIST.getException();
+        }
+
+        //임시 비밀번호 생성
+        String str = getTempPassword();
+        System.out.println(">>>>>>>>>>임시 비밀번호 생성 완료");
+
+        //메일발송
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+        message.setSubject("팻플래닛 임시 비밀번호 이메일 입니다.\n");
+        message.setText("안녕하세요, 임시비밀번호 안내 메일입니다.\n" + "회원님의 임시 비밀번호는 " + str + " 입니다.\n"+ "로그인 후에 비밀번호를 변경해주세요.");
+        message.setFrom("lyj3637@naver.com");
+        message.setReplyTo("lyj3637@naver.com");
+        System.out.println("메일 발송:"+message);
+        mailSender.send(message);
+        System.out.println(">>>>>>>>>>메일 발송 완료");
+
+        //메일 성공적으로 발송 시 해당 계정의 비밀번호 변경
+        String newStr = Crypto.encodeSHA256(str); //암호화
+        System.out.println(">>>>>>>>>>>>>>>>>tempPassword 암호화:"+newStr);
+        userRepository.changePassword(newStr, email);
+        //lock 해제
+        userRepository.unlock(email);
+
+        return  new HashMap<>();
+    }
+
+    //임시 비밀번호 생성
+    public String getTempPassword() {
+        char[] charSet = new char[] {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F',
+                'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
+
+        String str = "";
+
+        //문자 배열 길이의 값을 랜덤으로 8개를 뽑아 구분 작성
+        int idx = 0;
+        for(int i =0; i<8; i++) {
+            idx = (int) (charSet.length * Math.random());
+            str += charSet[idx];
+        }
+
+        System.out.println("임시 비밀번호"+str);
+
+        return str;
+    }
+
+    //회원 탈퇴 withdrawal
+    @Transactional
+    @SneakyThrows
+    public HashMap<String, Object> withdrawal() {
+
+        System.out.println(">>>>>>>>>>withdrawal() UserService");
+
+        //권한 확인
+        String authority = userRepository.selectAuthority(getUserKey());
+
+        System.out.println("userRepository.checkWithdrawal(getUserKey())"+userRepository.checkWithdrawal(getUserKey()));
+
+        //펫시터의 경우
+        if(authority.equals("P")) {
+            if(!userRepository.checkWithdrawal(getUserKey()).equals("0")){
+                //탈퇴 불가 에러
+                throw ErrorMessage.CANNOT_WITHDRAWAL.getException();
+            }
+        } else {
+            if(!userRepository.checkUserWithdrawal(getUserKey()).equals("0")) {
+                throw ErrorMessage.CANNOT_WITHDRAWAL.getException();
+            }
+        }
+
+        userRepository.withdrawal(getUserKey());
+
+        return  new HashMap<>();
+    }
+
+    //reCaptcha
+    @SneakyThrows
+    public HashMap<String, Object> verifyRecaptcha(String recaptcha) {
+        System.out.println(">>>>>>>>>>>>>>recatcha Service");
+        String secretKey = recaptchaConfig.getSecret();
+        System.out.println(">>>>>>>>>>>>>>recatcha Service secretKey"+secretKey);
+        String url = recaptchaConfig.getUrl();
+        System.out.println(">>>>>>>>>>>>>>recatcha Service url"+url);
+
+        URL obj = new URL(url);
+        HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
+        con.setRequestMethod("POST");
+
+        String postParams = "secret=" + secretKey + "&response=" + recaptcha;
+        System.out.println(">>>>>>>>>>>>>>>>postParams"+postParams);
+        con.setDoOutput(true);
+
+        DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+        wr.writeBytes(postParams);
+        wr.flush();
+        wr.close();
+        System.out.println(">>>>>>>>>>>>>>>>DataOutputStream");
+
+        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+        String inputLine;
+        StringBuffer response = new StringBuffer();
+        System.out.println(">>>>>>>>>>>>>>>>BufferedReader");
+
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        System.out.println(">>>>>>>>>>>>>>>>inputLine"+inputLine);
+        in.close();
+
+        JsonReader jsonReader = Json.createReader(new StringReader(response.toString()));
+        JsonObject jsonObject = jsonReader.readObject();
+        jsonReader.close();
+        System.out.println(">>>>>>>>>>>>>>>>getBoolean success"+jsonObject.getBoolean("success"));
+
+        return new HashMap<>() {{
+            put("recaptcha", jsonObject.getBoolean("success"));
+            //put("recaptcha", "false");
+        }};
+
+    }
+
 }
