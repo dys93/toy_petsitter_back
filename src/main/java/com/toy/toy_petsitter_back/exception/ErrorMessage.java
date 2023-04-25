@@ -25,9 +25,12 @@ public enum ErrorMessage {
     //유저 관련 오류
     ALREADY_ID(new CustomException(200, 2001, "이미 존재하는 아이디 입니다")), //중복 아이디 오류
     UNMATCHED_ID_PWD(new CustomException(200, 2002, "아이디 혹은 비밀번호를 확인해 주세요")), //아이디나 비밀번호 불일치
-    LOCK_USER(new CustomException(200, 2003, "계정이 잠겼습니다. 관리자에게 문의해 주세요")), //비밀번호 오류 횟수 3회 이상 -> 계정잠김
+    LOCK_USER(new CustomException(200, 2003, "계정이 잠겼습니다. 계정 잠금해제 혹은 관리자에게 문의해 주세요")), //비밀번호 오류 횟수 3회 이상 -> 계정잠김
     EXPIRED_ACCESS_TOKEN(new CustomException(200, 2004, "엑세스 토큰 만료")), //만료된 access token 오류
-    DUPLICATION_LOGIN(new CustomException(200, 2005, "다른 곳에서 로그인 되어 로그아웃 됩니다")) //중복 로그인 에러 -> 로그아웃
+    DUPLICATION_LOGIN(new CustomException(200, 2005, "다른 곳에서 로그인 되어 로그아웃 됩니다")), //중복 로그인 에러 -> 로그아웃
+    PARAMETER_NONE(new CustomException(200, 2006, "파라미터 에러")),
+    NONE_EXIST(new CustomException(200, 2007, "존재하지 않는 이메일 주소 입니다. 이메일 주소를 다시 한 번 확인해주세요.")),
+    CANNOT_WITHDRAWAL(new CustomException(200, 2008, "예약이 있는 상태에서는 탈퇴가 불가능 합니다."))
 
 
     ;
