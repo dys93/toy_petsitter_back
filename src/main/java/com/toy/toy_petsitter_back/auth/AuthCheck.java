@@ -10,8 +10,8 @@ import java.lang.annotation.Target;
  * 인터셉트에서 권한에 따라 토큰 확인 등의 처리를 위해 생성
  * @Authcheck 어노테이션의 roll 확인
  */
-@Target(ElementType.METHOD) //어노테이션이 표시될 위치
-@Retention(RetentionPolicy.RUNTIME) //어노테이션의 유지 범위
+@Target(ElementType.METHOD) //어노테이션이 표시될 위치//적용대상
+@Retention(RetentionPolicy.RUNTIME) //어노테이션의 유지 범위//대상
 public @interface AuthCheck {
 //    boolean isCheck() default true;
 

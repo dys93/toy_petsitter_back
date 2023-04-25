@@ -63,6 +63,7 @@ public class AuthInterceptor implements HandlerInterceptor {
         //토큰 디코딩
         DecodedJWT decodeJWT = new JwtService().getDecodedJwt(request);
         Integer userKey = Integer.parseInt(decodeJWT.getClaim("userKey").asString());
+        System.out.println(">>>>>>>>>>>>>>>>토큰 디코딩 userKey:"+userKey);
         String issuedDate = decodeJWT.getIssuedAt().toString();
 
         //DB에서 userKey 조회 결과가 없다면 INVALID_TOKEN 에러 발생
@@ -99,7 +100,7 @@ public class AuthInterceptor implements HandlerInterceptor {
         //유저 메뉴인 경우
         if(methodAnnotation.role() == AuthCheck.Role.USER) {
             System.out.println("유저만 접근 가능한 경우");
-            if(!authority.equals("U") && !authority.equals("P")){ //권한이 유저가 아닌 경우, 권한 불일치 에러 발생
+            if(!(authority.equals("N") || authority.equals("P"))){ //권한이 유저가 아닌 경우, 권한 불일치 에러 발생
                 throw ErrorMessage.UNMATCHED_AUTHORITY.getException();
             }
         }
