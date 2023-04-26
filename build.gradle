@@ -52,7 +52,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
 
 	//구글 reCaptcha
-	implementation 'net.tanesha.recaptcha4j:recaptcha4j:0.0.8'
+	implementation 'net.tanesha.recaptcha4j:recaptcha4j:0.0.7'
 	implementation 'javax.json:javax.json-api:1.1.4'
 	implementation 'org.glassfish:javax.json:1.1.4'
 
