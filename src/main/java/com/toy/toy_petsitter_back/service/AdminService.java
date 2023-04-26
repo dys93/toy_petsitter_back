@@ -156,14 +156,14 @@ public class AdminService extends  BaseService{
 
         if(type.equals("status")) {
             switch (search) {
-                case "예약신청": search = "R"; break;
-                case "예약거절": search = "RR"; break;
-                case "예약수락": search = "RA"; break;
-                case "결제완료": search = "PC"; break;
-                case "예약실행완료": search = "RC"; break;
-                case "예약취소": search = "RCC"; break;
-                case "환불요청": search = "RRQ"; break;
-                case "환불완료": search = "RCP"; break;
+                case "예약신청" -> search = "R";
+                case "예약거절" -> search = "RR";
+                case "예약수락" -> search = "RA";
+                case "결제완료" -> search = "PC";
+                case "예약실행완료" -> search = "RC";
+                case "예약취소" -> search = "RCC";
+                case "환불요청" -> search = "RRQ";
+                case "환불완료" -> search = "RCP";
             }
         }
         HashMap<String, Object> data = new HashMap<>();

@@ -1,7 +1,6 @@
-package com.toy.toy_petsitter_back.controller;
+package com.toy.toy_petsitter_back.config.controller;
 
 import com.toy.toy_petsitter_back.auth.AuthCheck;
-import com.toy.toy_petsitter_back.config.RecaptchaConfig;
 import com.toy.toy_petsitter_back.response.RestResponse;
 import com.toy.toy_petsitter_back.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;

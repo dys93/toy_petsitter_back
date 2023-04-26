@@ -1,4 +1,4 @@
-package com.toy.toy_petsitter_back.controller;
+package com.toy.toy_petsitter_back.config.controller;
 
 import com.toy.toy_petsitter_back.DTO.Criteria;
 import com.toy.toy_petsitter_back.auth.AuthCheck;

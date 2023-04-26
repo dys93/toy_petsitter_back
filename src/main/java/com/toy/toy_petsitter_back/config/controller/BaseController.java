@@ -1,4 +1,4 @@
-package com.toy.toy_petsitter_back.controller;
+package com.toy.toy_petsitter_back.config.controller;
 
 import com.toy.toy_petsitter_back.exception.ErrorMessage;
 import com.toy.toy_petsitter_back.service.LogService;

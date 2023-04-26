@@ -1,9 +1,7 @@
-package com.toy.toy_petsitter_back.controller;
+package com.toy.toy_petsitter_back.config.controller;
 
-import com.toy.toy_petsitter_back.DTO.Criteria;
 import com.toy.toy_petsitter_back.auth.AuthCheck;
 import com.toy.toy_petsitter_back.response.RestResponse;
-import com.toy.toy_petsitter_back.service.AdminService;
 import com.toy.toy_petsitter_back.service.DashboardService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;

@@ -1,4 +1,4 @@
-package com.toy.toy_petsitter_back.controller;
+package com.toy.toy_petsitter_back.config.controller;
 
 import com.toy.toy_petsitter_back.DTO.Criteria;
 import com.toy.toy_petsitter_back.auth.AuthCheck;
@@ -8,8 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.HashMap;
 
 
 @RequestMapping("/api/v1/petSit")
