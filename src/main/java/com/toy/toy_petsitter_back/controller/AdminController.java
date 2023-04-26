@@ -2,6 +2,7 @@ package com.toy.toy_petsitter_back.controller;
 
 import com.toy.toy_petsitter_back.DTO.Criteria;
 import com.toy.toy_petsitter_back.auth.AuthCheck;
+import com.toy.toy_petsitter_back.repository.UserRepository;
 import com.toy.toy_petsitter_back.response.RestResponse;
 import com.toy.toy_petsitter_back.service.AdminService;
 import com.toy.toy_petsitter_back.service.UserService;
@@ -15,14 +16,18 @@ import org.springframework.web.bind.annotation.RestController;
 public class AdminController extends BaseController {
 
     private final AdminService adminService;
-    public AdminController(AdminService adminService) {
+    private final UserService userService;
+    private final UserRepository userRepository;
+
+    public AdminController(AdminService adminService, UserService userService, UserRepository userRepository) {
         this.adminService = adminService;
+        this.userService = userService;
+        this.userRepository = userRepository;
     }
 
     /**
      * 로그인
      */
-//    @AuthCheck(role = AuthCheck.Role.ADMIN)
     @AuthCheck(role = AuthCheck.Role.NONE)
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public ResponseEntity<?> login() {
@@ -133,4 +138,19 @@ public class AdminController extends BaseController {
         return new RestResponse().ok().setBody(adminService.refundConfirm(Integer.parseInt(getParameter("reservationSeq")))).responseEntity();
     }
 
+    /**
+     * 임시 비밀번호 발송
+     */
+    @AuthCheck(role = AuthCheck.Role.ADMIN)
+    @RequestMapping(value = "/sendEmail", method = RequestMethod.PUT)
+    public ResponseEntity<?> sendEmail() {
+        System.out.println(">>>>>>>>>>임시 비밀번호 발송 컨트롤러");
+
+        System.out.println(">>>>>>>>>>>>>>>>>>>userSeq"+getParameter("userSeq"));
+
+        //이메일 주소 가져오기
+        String email = userRepository.selectEmail(Integer.parseInt(getParameter("userSeq")));
+
+        return new RestResponse().ok().setBody(userService.sendEmail(email)).responseEntity();
+    }
 }
