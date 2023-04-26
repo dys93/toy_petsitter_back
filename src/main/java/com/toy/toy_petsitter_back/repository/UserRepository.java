@@ -73,4 +73,7 @@ public interface UserRepository {
     //계정 탈퇴 유저 확인
     String checkUserWithdrawal(Integer userSeq);
 
+    //임시 비밀번호로 변경
+    void updateTempPassword(String password, String email);
+
 }

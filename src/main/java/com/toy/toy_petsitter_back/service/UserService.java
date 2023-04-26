@@ -68,10 +68,6 @@ public class UserService extends BaseService {
         //이미 존재하는 아이디인 경우 오류
         if(userRepository.checkId(id) != null) throw ErrorMessage.ALREADY_ID.getException();
 
-        //비밀번호 암호화 -> 프론트에서 암호화
-        //String encodedPwd = Crypto.encodeSHA256(pwd + id.substring(0,4));
-        //String userKey = Crypto.encodeSHA128(System.currentTimeMillis() + System.nanoTime() + id);
-
         //Service로 넘길 data
         HashMap<String, Object> data = new HashMap<>();
         data.put("authority", authority);
@@ -107,20 +103,20 @@ public class UserService extends BaseService {
         if(Objects.equals(resultUser.get("user_status").toString(), "R")) throw ErrorMessage.LOCK_USER.getException();
 
         //비밀번호 오류 횟수
-        int count = (int)resultUser.get("fail_count");
+        //int count = (int)resultUser.get("fail_count");
 
         //비밀번호가 틀렸으면 로그인 실패
         if(!resultUser.get("password").equals(pwd)) {
             //오류 2회 이상
-            if(count >= 2) {
-                //계정 잠금 및 오류 횟수 추가, 오류 내보내기
-                count++;
-                userRepository.lockUser(count, id);
-                throw ErrorMessage.LOCK_USER.getException();
-            }
+//            if(count >= 2) {
+//                //계정 잠금 및 오류 횟수 추가, 오류 내보내기
+//                count++;
+//                userRepository.lockUser(count, id);
+//                throw ErrorMessage.LOCK_USER.getException();
+//            }
             //오류 횟수 카운트 + 1, 오류 내보내기
-            count++;
-            userRepository.addFailCount(count, id);
+//            count++;
+//            userRepository.addFailCount(count, id);
             throw ErrorMessage.UNMATCHED_ID_PWD.getException();
         }
 
@@ -146,6 +142,11 @@ public class UserService extends BaseService {
 
         //마지막 로그인 일자 update
         userRepository.updateLastLogin(Integer.parseInt(resultUser.get("user_seq").toString()));
+
+        if(resultUser.get("temp_yn").equals("Y")){
+            System.out.println(">>>>>>>>>>>>>>>>temp_yn"+resultUser.get("temp_yn"));
+            result.put("tempYn", "Y");
+        }
 
         return result;
     }
@@ -239,7 +240,6 @@ public class UserService extends BaseService {
         System.out.println(">>>>>>>>>>checkAuthority() UserService");
 
         //토큰에서 user_key 가져와서 권한 확인 후 내림
-        System.out.println(">>>>>>>>>>권한 체크_getUserKey()"+getUserKey());
         String authority = userRepository.selectAuthority(getUserKey());
         System.out.println(">>>>>>>>>>권한 체크_authority"+authority);
 
@@ -263,7 +263,6 @@ public class UserService extends BaseService {
 
         //임시 비밀번호 생성
         String str = getTempPassword();
-        System.out.println(">>>>>>>>>>임시 비밀번호 생성 완료");
 
         //메일발송
         SimpleMailMessage message = new SimpleMailMessage();
@@ -274,12 +273,11 @@ public class UserService extends BaseService {
         message.setReplyTo("lyj3637@naver.com");
         System.out.println("메일 발송:"+message);
         mailSender.send(message);
-        System.out.println(">>>>>>>>>>메일 발송 완료");
 
         //메일 성공적으로 발송 시 해당 계정의 비밀번호 변경
         String newStr = Crypto.encodeSHA256(str); //암호화
-        System.out.println(">>>>>>>>>>>>>>>>>tempPassword 암호화:"+newStr);
-        userRepository.changePassword(newStr, email);
+        userRepository.updateTempPassword(newStr, email);
+
         //lock 해제
         userRepository.unlock(email);
 
@@ -315,8 +313,6 @@ public class UserService extends BaseService {
         //권한 확인
         String authority = userRepository.selectAuthority(getUserKey());
 
-        System.out.println("userRepository.checkWithdrawal(getUserKey())"+userRepository.checkWithdrawal(getUserKey()));
-
         //펫시터의 경우
         if(authority.equals("P")) {
             if(!userRepository.checkWithdrawal(getUserKey()).equals("0")){
@@ -328,7 +324,6 @@ public class UserService extends BaseService {
                 throw ErrorMessage.CANNOT_WITHDRAWAL.getException();
             }
         }
-
         userRepository.withdrawal(getUserKey());
 
         return  new HashMap<>();
@@ -338,10 +333,9 @@ public class UserService extends BaseService {
     @SneakyThrows
     public HashMap<String, Object> verifyRecaptcha(String recaptcha) {
         System.out.println(">>>>>>>>>>>>>>recatcha Service");
+
         String secretKey = recaptchaConfig.getSecret();
-        System.out.println(">>>>>>>>>>>>>>recatcha Service secretKey"+secretKey);
         String url = recaptchaConfig.getUrl();
-        System.out.println(">>>>>>>>>>>>>>recatcha Service url"+url);
 
         URL obj = new URL(url);
         HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
@@ -355,17 +349,14 @@ public class UserService extends BaseService {
         wr.writeBytes(postParams);
         wr.flush();
         wr.close();
-        System.out.println(">>>>>>>>>>>>>>>>DataOutputStream");
 
         BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
         String inputLine;
         StringBuffer response = new StringBuffer();
-        System.out.println(">>>>>>>>>>>>>>>>BufferedReader");
 
         while ((inputLine = in.readLine()) != null) {
             response.append(inputLine);
         }
-        System.out.println(">>>>>>>>>>>>>>>>inputLine"+inputLine);
         in.close();
 
         JsonReader jsonReader = Json.createReader(new StringReader(response.toString()));

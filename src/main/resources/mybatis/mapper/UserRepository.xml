@@ -56,7 +56,7 @@
 
     <!-- 비밀번호 변경 -->
     <update id="changePassword">
-        UPDATE USER SET password = #{password} WHERE email = #{email}
+        UPDATE USER SET password = #{password}, temp_yn='N' WHERE email = #{email}
     </update>
 
     <!-- 토큰 저장 -->
@@ -113,5 +113,10 @@
     <select id="checkUserWithdrawal" parameterType="Integer" resultType="String">
         SELECT COUNT(*) FROM RESERVATION WHERE  USER_SEQ =#{userSeq} AND DATE_FORMAT(check_out, '%Y-%m-%d') <![CDATA[<=]]> CURDATE() AND NOT reservation_status IN ('RR', 'RC', 'RCC', 'RCP', 'RVC');
     </select>
+
+    <!-- 임시 비밀번호로 변경 -->
+    <update id="updateTempPassword" parameterType="String">
+        UPDATE USER SET password = #{password}, temp_yn='Y' WHERE email = #{email}
+    </update>
 
 </mapper>
