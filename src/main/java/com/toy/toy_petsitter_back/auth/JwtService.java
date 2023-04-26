@@ -17,7 +17,7 @@ import java.util.HashMap;
 public class JwtService {
 
     private final String ISSUER = "ToyApi"; //발급주체
-    private final Long EXPIRED = 60L * 3; //유효시간(30분) 60L * 30
+    private final Long EXPIRED = 60L * 30; //유효시간(30분) 60L * 30
     private final Long EXPIRED_LONG = 60L * 60 * 24; //유효기간(2주) 60L * 60 * 24 * 14
     private final String HMAC256SECRET_A = "Ks0#s.dfkG-@ksvI"; //서명에 사용할 암호키. 16자리 문자열
     private final String HMAC256SECRET_R = "dgG2*dG*_s#g^gGl"; //서명에 사용할 암호키. 16자리 문자열
@@ -83,10 +83,20 @@ public class JwtService {
     @SneakyThrows
     public DecodedJWT getDecodedJwtWithToken(String jwtToken) {
         System.out.println(">>>>>>>>>>>>JWT 토큰 디코딩 with token:" +jwtToken);
+        try {
             return JWT.require(Algorithm.HMAC256(HMAC256SECRET_A))
                     .withIssuer(ISSUER)
                     .build()
                     .verify(jwtToken.replace("Bearer ", ""));
+        } catch (Exception e) {
+            //AccessToken 만료시 에러 내림
+            if(e.getMessage().contains("expired")) {
+                System.out.println(">>>>>>>>>>AccessToken 만료 시 에러");
+                throw ErrorMessage.EXPIRED_ACCESS_TOKEN.getException();
+            } else {
+                throw ErrorMessage.INVALID_TOKEN.getException();
+            }
+        }
     }
 
     //JWT 토큰 디코딩 with refresh token
