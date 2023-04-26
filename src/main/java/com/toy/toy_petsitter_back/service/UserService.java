@@ -1,7 +1,6 @@
 package com.toy.toy_petsitter_back.service;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.toy.toy_petsitter_back.DTO.Member;
 import com.toy.toy_petsitter_back.auth.JwtService;
 import com.toy.toy_petsitter_back.config.RecaptchaConfig;
 import com.toy.toy_petsitter_back.exception.ErrorMessage;

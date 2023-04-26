@@ -1,17 +1,7 @@
 package com.toy.toy_petsitter_back.service;
 
-import com.toy.toy_petsitter_back.DTO.Criteria;
-import com.toy.toy_petsitter_back.DTO.Member;
-import com.toy.toy_petsitter_back.DTO.Pagination;
-import com.toy.toy_petsitter_back.auth.JwtService;
-import com.toy.toy_petsitter_back.exception.ErrorMessage;
-import com.toy.toy_petsitter_back.repository.AdminRepository;
 import com.toy.toy_petsitter_back.repository.DashboardRepository;
-import com.toy.toy_petsitter_back.repository.PetSitRepository;
-import com.toy.toy_petsitter_back.repository.UserRepository;
-import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 
