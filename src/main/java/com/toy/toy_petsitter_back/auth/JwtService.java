@@ -25,21 +25,21 @@ public class JwtService {
 
 
     //JWT 토큰 생성
-    public HashMap<String, Object> createJwt(Member member) {
+    public HashMap<String, Object> createJwt(String userKey) {
         System.out.println(">>>>>>>>>>>>>>>JWT 토큰 생성_createJwt");
         HashMap<String, Object> result = new HashMap<>();
         //토큰 생성 일자
         Date issuedDate = Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant());
 
         String accessToken = JWT.create()
-                .withClaim("userKey", member.getUserKey()) //해당 부분을 이용해 JWT 토큰 내에 여러가지 데이터 저장 가능
+                .withClaim("userKey", userKey) //해당 부분을 이용해 JWT 토큰 내에 여러가지 데이터 저장 가능
                 .withIssuedAt(issuedDate) //생성일자
                 .withIssuer(ISSUER) //발행주체
                 .withExpiresAt(Date.from(LocalDateTime.now().plusSeconds(EXPIRED).atZone(ZoneId.systemDefault()).toInstant())) //유효기간
                 .sign(Algorithm.HMAC256(HMAC256SECRET_A));
 
         String refreshToken = JWT.create()
-                .withClaim("userKey", member.getUserKey())
+                .withClaim("userKey", userKey)
                 .withIssuedAt(issuedDate) //생성일자
                 .withIssuer(ISSUER) //발행주체
                 .withExpiresAt(Date.from(LocalDateTime.now().plusSeconds(EXPIRED_LONG).atZone(ZoneId.systemDefault()).toInstant())) //유효기간

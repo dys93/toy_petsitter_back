@@ -121,11 +121,9 @@ public class UserService extends BaseService {
         }
 
         //아이디 존재 + 비밀번호 일치 => 로그인 : accessToken 생성해서 응답 내려줌 + 중복로그인 여부 확인
-        Member member = new Member();
-        member.setUserKey(resultUser.get("user_seq").toString());
 
         //토큰 생성 및 refreshToken & 생성일자 저장
-        HashMap<String, Object> result = new JwtService().createJwt(member);
+        HashMap<String, Object> result = new JwtService().createJwt(resultUser.get("user_seq").toString());
         result.get("refreshToken");
         result.get("issuedDate");
         System.out.println(">>>>>>>>>>>토큰 생성 및 refreshToken 저장_refreshToken"+result.get("refreshToken"));
@@ -218,16 +216,11 @@ public class UserService extends BaseService {
             throw ErrorMessage.INVALID_TOKEN.getException();
         }
         //일치하는 경우 => access토큰, refresh토큰 갱신 및 응답
-        Member member = new Member();
         HashMap<String, Object> userResult = userRepository.findUserKey(userKey);
         System.out.println(">>>>>>>>>>>>>>>>>>>user_seq"+userResult.get("user_seq").toString());
-        System.out.println(">>>>>>>>>>>>>>>>>>>email"+userResult.get("email").toString());
-        member.setUserKey(userResult.get("user_seq").toString());
-        member.setEmail(userResult.get("email").toString());
-
 
         //토큰 생성 및 refreshToken & issuedDate 저장
-        HashMap<String, Object> result = new JwtService().createJwt(member);
+        HashMap<String, Object> result = new JwtService().createJwt(userResult.get("user_seq").toString());
         System.out.println(">>>>>>>>>>>토큰 생성 및 refreshToken 저장_refreshToken"+result.get("refreshToken"));
         userRepository.updateToken(userKey, result.get("refreshToken").toString(), result.get("issuedDate").toString());
 

@@ -12,5 +12,6 @@ public class Member {
     public Member() {}
 
     private String userKey;
-    private String token;
+    private String email;
+    private String authority;
 }

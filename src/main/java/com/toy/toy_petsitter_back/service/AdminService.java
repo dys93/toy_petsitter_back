@@ -48,19 +48,9 @@ public class AdminService extends  BaseService{
         }
 
         //아이디 존재 + 비밀번호 일치 => 로그인 : accessToken 생성해서 응답 내려줌 + 중복로그인 여부 확인
-        Member member = new Member();
-        member.setUserKey(resultUser.get("user_seq").toString());
-
-        System.out.println(">>>>>>>>>>>>>>>>>>authority A인지 확인"+resultUser.get("authority").toString());
-
-        //권한 확인
-//        if(!resultUser.get("authority").toString().equals("A")){
-//            //오류 메시지
-//            throw ErrorMessage.UNMATCHED_AUTHORITY.getException();
-//        }
 
         //토큰 생성 및 refreshToken 저장
-        HashMap<String, Object> result = new JwtService().createJwt(member);
+        HashMap<String, Object> result = new JwtService().createJwt(resultUser.get("user_seq").toString());
         result.get("refreshToken");
         System.out.println(">>>>>>>>>>>토큰 생성 및 refreshToken 저장_refreshToken"+result.get("refreshToken"));
 
@@ -70,7 +60,6 @@ public class AdminService extends  BaseService{
         } else {
             userRepository.updateToken(Integer.parseInt(resultUser.get("user_seq").toString()), result.get("refreshToken").toString(), result.get("issuedDate").toString());
         }
-
 
         //마지막 로그인 일자 update
         userRepository.updateLastLogin(Integer.parseInt(resultUser.get("user_seq").toString()));
